@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="org.apache.jena.sparql.algebra.op.OpReduced"/>
+    <fullyQualifiedTypeName name="java.util.HashMap"/>
+    <fullyQualifiedTypeName name="qengine.program.MainRDFHandler"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
+    <fullyQualifiedTypeName name="com.github.andrewoma.dexx.collection.Map"/>
+    <fullyQualifiedTypeName name="com.github.andrewoma.dexx.collection.HashMap"/>
+</qualifiedTypeNameHistroy>
