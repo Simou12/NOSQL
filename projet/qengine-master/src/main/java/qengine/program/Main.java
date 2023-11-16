@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -142,28 +143,32 @@ final class Main {
 			rdfParser.setRDFHandler(mainRdfHandler);
 			// Parsing et traitement de chaque triple par le handler
 			rdfParser.parse(dataReader, baseURI);	
-			java.util.Map<Integer, String> dictionnary= mainRdfHandler.getDictionnary();
+			java.util.Map<Integer, String> dictionnary= mainRdfHandler.getDictionnary().getDictionnary();
 			/*for (Entry<Integer, String> entry : ( dictionnary).entrySet()) {
 				System.out.println(entry.getKey()+" ; "+entry.getValue());
 			}*/
+			Index index=mainRdfHandler.getIndex();
 			
-		 ArrayList<ArrayList<Integer>> spo=mainRdfHandler.getSpo();
-		 ArrayList<ArrayList<Integer>> sop=mainRdfHandler.getSop();
-		 ArrayList<ArrayList<Integer>> pso=mainRdfHandler.getPso();
-		 ArrayList<ArrayList<Integer>> pos=mainRdfHandler.getPos();
-		 ArrayList<ArrayList<Integer>> osp=mainRdfHandler.getOsp();
-		 ArrayList<ArrayList<Integer>> ops=mainRdfHandler.getOps();
+		 ArrayList<ArrayList<Integer>> spo=index.trierListe(index.getSpo());
+		 ArrayList<ArrayList<Integer>> sop=index.trierListe(index.getSop());
+		 ArrayList<ArrayList<Integer>> pso=index.trierListe(index.getPso());
+		 ArrayList<ArrayList<Integer>> pos=index.trierListe(index.getPos());
+		 ArrayList<ArrayList<Integer>> osp=index.trierListe(index.getOsp());
+		 ArrayList<ArrayList<Integer>> ops=index.trierListe(index.getOps());	 
+		  
+		 System.out.println(" Le dictionnaire : \n");
+		 mainRdfHandler.getDictionnary().afficherDictionnaire();
 		 
+		 System.out.println(" Les index : \n");
+		
 		 afficherContenuListe("SPO"  , spo);
 		 afficherContenuListe("sop"  , sop);
 		 afficherContenuListe("pso"  , pso);
 		 afficherContenuListe("pos"  , pos);
 		 afficherContenuListe("osp"  , osp);
 		 afficherContenuListe("ops"  , ops);
-			          			
-		}
-		
-	      
+			
+		}      
 	}
 	private static void afficherContenuListe(String nomListe, ArrayList<ArrayList<Integer>> liste) {
         System.out.println("Contenu de la liste " + nomListe.toUpperCase() + ":");
