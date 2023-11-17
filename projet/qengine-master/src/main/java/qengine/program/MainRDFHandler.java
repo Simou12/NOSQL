@@ -21,9 +21,12 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
  * </p>
  */
 
-public final class MainRDFHandler extends AbstractRDFHandler {	
+public final class MainRDFHandler extends AbstractRDFHandler {
+	
 	String subject,predicate, object;	
+	
 	Dictionnary dictionnary=new Dictionnary();
+	
 	Index index=new Index();
 	
 	public Dictionnary getDictionnary() {
@@ -44,15 +47,16 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 	}
 
 
-
 	@SuppressWarnings("deprecation")
 	@Override
 	
 	public void handleStatement(Statement st) {
+		
 	
 		subject=st.getSubject().toString();
 		predicate=st.getPredicate()+"";
 		object=st.getObject().toString();
+		System.out.println(subject+" "+predicate+" "+object);
 		dictionnary.addElement(subject);
 		dictionnary.addElement(predicate);
 		dictionnary.addElement(object);

@@ -1,88 +1,109 @@
 package qengine.program;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
 
 public class Index {
 	
-	private ArrayList<ArrayList<Integer>> spo;
-	private ArrayList<ArrayList<Integer>> sop;
-	private ArrayList<ArrayList<Integer>> pso;
-	private ArrayList<ArrayList<Integer>> pos;
-	private ArrayList<ArrayList<Integer>> osp; 
-	private ArrayList<ArrayList<Integer>> ops; 
+	Map<Integer, Map<Integer, HashSet<Integer>>> spo;
+	Map<Integer, Map<Integer, HashSet<Integer>>> sop;
+	Map<Integer, Map<Integer, HashSet<Integer>>> pso;
+	Map<Integer, Map<Integer, HashSet<Integer>>> pos;
+	Map<Integer, Map<Integer, HashSet<Integer>>> osp;
+	Map<Integer, Map<Integer, HashSet<Integer>>> ops;
+	
+	
+	/*private HashSet<HashSet<Integer>> spo;
+	private HashSet<HashSet<Integer>> sop;
+	private HashSet<HashSet<Integer>> pso;
+	private HashSet<HashSet<Integer>> pos;
+	private HashSet<HashSet<Integer>> osp; 
+	private HashSet<HashSet<Integer>> ops; */
 	
 	public Index() {
 		super();
-		this.spo=new ArrayList<>();
-		this.sop=new ArrayList<>();
-		this.pso=new ArrayList<>();
-		this.pos=new ArrayList<>();
-		this.osp=new ArrayList<>();
-		this.ops=new ArrayList<>();
+		this.spo=new HashMap<>();
+		this.sop=new HashMap<>();
+		this.pso=new HashMap<>();
+		this.pos=new HashMap<>();
+		this.osp=new HashMap<>();
+		this.ops=new HashMap<>();
 		
 	}
 	
-	public ArrayList<ArrayList<Integer>> getSpo() {
+	public Map<Integer, Map<Integer, HashSet<Integer>>> getSpo() {
 		return spo;
 	}
 
-	public void setSpo(ArrayList<ArrayList<Integer>> spo) {
+
+	public void HashSetSpo(Map<Integer, Map<Integer, HashSet<Integer>>> spo) {
 		this.spo = spo;
 	}
 
-	public ArrayList<ArrayList<Integer>> getSop() {
+	public Map<Integer, Map<Integer, HashSet<Integer>>> getSop() {
 		return sop;
 	}
 
-    public void setSop(ArrayList<ArrayList<Integer>> sop) {
+	public void HashSetSop(Map<Integer, Map<Integer, HashSet<Integer>>> sop) {
 		this.sop = sop;
 	}
 
-	public ArrayList<ArrayList<Integer>> getPso() {
+	public Map<Integer, Map<Integer, HashSet<Integer>>> getPso() {
 		return pso;
 	}
 
-	public void setPso(ArrayList<ArrayList<Integer>> pso) {
+	public void HashSetPso(Map<Integer, Map<Integer, HashSet<Integer>>> pso) {
 		this.pso = pso;
 	}
 
-	public ArrayList<ArrayList<Integer>> getPos() {
+	public Map<Integer, Map<Integer, HashSet<Integer>>> getPos() {
 		return pos;
 	}
 
-	public void setPos(ArrayList<ArrayList<Integer>> pos) {
+
+
+	public void HashSetPos(Map<Integer, Map<Integer, HashSet<Integer>>> pos) {
 		this.pos = pos;
 	}
 
-	public ArrayList<ArrayList<Integer>> getOsp() {
+
+
+	public Map<Integer, Map<Integer, HashSet<Integer>>> getOsp() {
 		return osp;
 	}
 
-	public void setOsp(ArrayList<ArrayList<Integer>> osp) {
+
+
+	public void HashSetOsp(Map<Integer, Map<Integer, HashSet<Integer>>> osp) {
 		this.osp = osp;
 	}
 
-	public ArrayList<ArrayList<Integer>> getOps() {
+
+
+	public Map<Integer, Map<Integer, HashSet<Integer>>> getOps() {
 		return ops;
 	}
 
-	public void setOps(ArrayList<ArrayList<Integer>> ops) {
+
+
+	public void HashSetOps(Map<Integer, Map<Integer, HashSet<Integer>>> ops) {
 		this.ops = ops;
 	}
-
-	public void addIndex(Map<Integer, String> map, String subject, String predicate ,String object ){	
+	
+	public void addIndex(Map<Integer, String> map, String subject, String predicate ,String object ) {
 		int indexSub, indexPred, indexOb;
 		indexSub=0;
 		indexPred=0;
 		indexOb=0;
+		
 		for (Map.Entry<Integer, String> entry : map.entrySet()) {
-	        if (entry.getValue().equals(subject)) {
+			 if (entry.getValue().equals(subject)) {
 	             indexSub = entry.getKey();
 	        } 
 	        if (entry.getValue().equals(predicate)) {
@@ -90,35 +111,34 @@ public class Index {
 	        }
 	        if (entry.getValue().equals(object)) {
 	             indexOb  = entry.getKey();
-	        }		            
-	    }
+	        }		       	
+		}
+		if(spo.containsKey(indexSub)) {
+			Map<Integer, HashSet<Integer>> dicPredicate= spo.get(indexSub);
+			if(dicPredicate.containsKey(indexPred)) {
+				HashSet<Integer> listObject=dicPredicate.get(indexPred);
+				if(!listObject.contains(indexOb)) listObject.add(indexOb);	
+			}else {
+				HashSet<Integer> newListObject= new HashSet<>();
+				newListObject.add(indexOb);
+				dicPredicate.put(indexPred, newListObject);		
+			}	
+		}else{
+			HashSet<Integer> newListObject= new HashSet<>();
+			newListObject.add(indexOb);
+			Map<Integer, HashSet<Integer>> newDicPredicate=new HashMap<>();
+			newDicPredicate.put(indexPred, newListObject);
+			spo.put(indexSub, newDicPredicate);		
+		}
 		
-		this.spo.add( new ArrayList<>(Arrays.asList( indexSub,indexPred ,indexOb )));
-		this.sop.add( new ArrayList<>(Arrays.asList( indexSub, indexOb, indexPred )));
-		this.pso.add( new ArrayList<>(Arrays.asList( indexPred, indexSub, indexOb )));
-		this.pos.add( new ArrayList<>(Arrays.asList( indexPred, indexOb, indexSub )));
-		this.osp.add( new ArrayList<>(Arrays.asList( indexOb, indexSub ,indexPred )));
-		this.ops.add( new ArrayList<>(Arrays.asList(indexOb ,indexPred ,indexSub )));
+		
+		
+		
+		
+		
 	}
+
+
 	
-	public ArrayList<ArrayList<Integer>> trierListe(ArrayList<ArrayList<Integer>> list) {
-        list.sort(new Comparator<List<Integer>>() {
-            @Override
-            public int compare(List<Integer> list1, List<Integer> list2) {
-                int size = Math.min(list1.size(), list2.size());
-
-                for (int i = 0; i < size; i++) {
-                    int compareResult = list1.get(i).compareTo(list2.get(i));
-                    if (compareResult != 0) {
-                        return compareResult;
-                    }
-                }
-
-                return Integer.compare(list1.size(), list2.size());
-            }
-        });
-
-        return list;
-    }
 	
 }
