@@ -136,8 +136,48 @@ public class Index {
 		
 		
 		
-	}
 	
+	
+		//POS
+		if(pos.containsKey(indexPred)) {
+			Map<Integer, HashSet<Integer>> dicObject= pos.get(indexPred);
+			if(dicObject.containsKey(indexOb)) {
+			HashSet<Integer> listSubject=dicObject.get(indexOb);
+			if(!listSubject.contains(indexSub)) listSubject.add(indexsub);
+			}else {
+			HashSet<Integer> newListSubject= new HashSet<>();
+			newListSubject.add(indexsub);
+			dicObject.put(indexOb, newListSubject);
+			}
+		}else{
+			HashSet<Integer> newListSubject= new HashSet<>();
+			newListObject.add(indexSub);
+			Map<Integer, HashSet<Integer>> newDicObject=new HashMap<>();
+			newDicObject.put(indexOb, newListSubject);
+			pos.put(indexPred, newDicObject);
+
+
+		//OPS
+		if(ops.containsKey(indexOb)) {
+			Map<Integer, HashSet<Integer>> dicPredicate= ops.get(indexOb);
+			if(dicPredicate.containsKey(indexPred)) {
+			HashSet<Integer> listSubject=dicPredicate.get(indexPred);
+			if(!listSubject.contains(indexSub)) listSubject.add(indexsub);
+			}else {
+			HashSet<Integer> newListSubject= new HashSet<>();
+			newListSubject.add(indexSub);
+			dicPredicate.put(indexPred, newListSubject);
+			}
+		}else{
+			HashSet<Integer> newListSubject= new HashSet<>();
+			newListSubject.add(indexSub);
+			Map<Integer, HashSet<Integer>> newDicPredicate=new HashMap<>();
+			newDicPredicate.put(indexPred, newListSubject);
+			ops.put(indexOb, newDicPredicate);
+
+	}
+
+
 	public  void displayMap(Map<Integer, Map<Integer, HashSet<Integer>>> dic, String nom) {
 		System.out.println(nom.toUpperCase()+"\n");
         for (Map.Entry<Integer, Map<Integer, HashSet<Integer>>> entry : dic.entrySet()) {
