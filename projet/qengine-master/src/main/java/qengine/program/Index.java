@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.HashSet;
 
 public class Index {
@@ -113,6 +114,8 @@ public class Index {
 	             indexOb  = entry.getKey();
 	        }		       	
 		}
+		
+		//spo
 		if(spo.containsKey(indexSub)) {
 			Map<Integer, HashSet<Integer>> dicPredicate= spo.get(indexSub);
 			if(dicPredicate.containsKey(indexPred)) {
@@ -133,12 +136,30 @@ public class Index {
 		
 		
 		
-		
-		
-		
 	}
-
-
 	
-	
+	public  void displayMap(Map<Integer, Map<Integer, HashSet<Integer>>> dic, String nom) {
+		System.out.println(nom.toUpperCase()+"\n");
+        for (Map.Entry<Integer, Map<Integer, HashSet<Integer>>> entry : dic.entrySet()) {
+            Integer key1 = entry.getKey();
+            Map<Integer, HashSet<Integer>> innerMap = entry.getValue();
+
+            System.out.println("Clé externe: " + key1);
+
+            for (Map.Entry<Integer, HashSet<Integer>> innerEntry : innerMap.entrySet()) {
+                Integer key2 = innerEntry.getKey();
+                HashSet<Integer> set = innerEntry.getValue();
+
+                System.out.println("   Clé interne: " + key2 + ", Ensemble de valeurs: " + set);
+            }
+        }
+    }
+		
+		
+		
 }
+
+
+	
+	
+

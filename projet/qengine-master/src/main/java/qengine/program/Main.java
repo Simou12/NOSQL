@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -59,28 +60,33 @@ final class Main {
 	 * Fichier contenant des données rdf
 	 */
 	static final String dataFile = workingDir + "sample_data.nt";
-
-	// ========================================================================
-
+	
+	
+	
 	/**
 	 * Méthode utilisée ici lors du parsing de requête sparql pour agir sur l'objet obtenu.
 	 */
-	public static void processAQuery(ParsedQuery query) {
+	public static ArrayList<ArrayList<String>> processAQuery(ParsedQuery query) {
 		List<StatementPattern> patterns = StatementPatternCollector.process(query.getTupleExpr());
+		ArrayList<ArrayList<String>> listPatterns = new ArrayList<>();
 
-		System.out.println("first pattern : " + patterns.get(0));
-
-		System.out.println("object of the first pattern : " + patterns.get(0).getObjectVar().getValue());
-
-		System.out.println("variables to project : ");
-
-		// Utilisation d'une classe anonyme
-		query.getTupleExpr().visit(new AbstractQueryModelVisitor<RuntimeException>() {
-
-			public void meet(Projection projection) {
-				System.out.println(projection.getProjectionElemList().getElements());
-			}
-		});
+		/*for (StatementPattern pattern: patterns) {	
+			
+			listPatterns.addAll(Arrays.asList(pattern.getPredicateVar().toString(), pattern.getObjectVar().toString()));
+			System.out.println("object of the first pattern : " + patterns.get(0).getObjectVar().getValue());
+		
+			System.out.println("variables to project : ");
+			
+		
+			// Utilisation d'une classe anonyme
+			query.getTupleExpr().visit(new AbstractQueryModelVisitor<RuntimeException>() {
+		
+				public void meet(Projection projection) {
+					System.out.println(projection.getProjectionElemList().getElements());
+				}
+			});
+		}*/
+		return listPatterns;
 	}
 
 	/**
@@ -149,32 +155,28 @@ final class Main {
 			}*/
 			Index index=mainRdfHandler.getIndex();
 			
-		 ArrayList<ArrayList<Integer>> spo=index.trierListe(index.getSpo());
-		 ArrayList<ArrayList<Integer>> sop=index.trierListe(index.getSop());
-		 ArrayList<ArrayList<Integer>> pso=index.trierListe(index.getPso());
-		 ArrayList<ArrayList<Integer>> pos=index.trierListe(index.getPos());
-		 ArrayList<ArrayList<Integer>> osp=index.trierListe(index.getOsp());
-		 ArrayList<ArrayList<Integer>> ops=index.trierListe(index.getOps());	 
+		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> spo=index.getSpo();
+		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> sop=index.getSop();
+		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> pso=index.getPso();
+		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> pos=index.getPos();
+		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> osp=index.getOsp();
+		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> ops=index.getOps(); 
 		  
-		 System.out.println(" Le dictionnaire : \n");
+		/* System.out.println(" Le dictionnaire : \n");
 		 mainRdfHandler.getDictionnary().afficherDictionnaire();
 		 
-		 System.out.println(" Les index : \n");
+		 System.out.println(" #################Les index ################# \n");
 		
-		 afficherContenuListe("SPO"  , spo);
-		 afficherContenuListe("sop"  , sop);
-		 afficherContenuListe("pso"  , pso);
-		 afficherContenuListe("pos"  , pos);
-		 afficherContenuListe("osp"  , osp);
-		 afficherContenuListe("ops"  , ops);
-			
-		}      
+		 index.displayMap(spo,"spo");
+		 index.displayMap(sop,"sop");
+		 index.displayMap(pso,"pso");
+		 index.displayMap(pos,"pos");
+		 index.displayMap(osp,"osp");
+		 index.displayMap(ops,"ops");*/
+		 
+		 
+		} 	
 	}
-	private static void afficherContenuListe(String nomListe, ArrayList<ArrayList<Integer>> liste) {
-        System.out.println("Contenu de la liste " + nomListe.toUpperCase() + ":");
-        for (ArrayList<Integer> elements : liste) {
-            System.out.println(elements);
-        }
-        System.out.println(); // Ajout d'une ligne vide pour la clarté
-    }
+	
+        
 }
