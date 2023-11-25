@@ -143,18 +143,19 @@ public class Index {
 			Map<Integer, HashSet<Integer>> dicObject= pos.get(indexPred);
 			if(dicObject.containsKey(indexOb)) {
 			HashSet<Integer> listSubject=dicObject.get(indexOb);
-			if(!listSubject.contains(indexSub)) listSubject.add(indexsub);
+			if(!listSubject.contains(indexSub)) listSubject.add(indexSub);
 			}else {
 			HashSet<Integer> newListSubject= new HashSet<>();
-			newListSubject.add(indexsub);
+			newListSubject.add(indexSub);
 			dicObject.put(indexOb, newListSubject);
 			}
 		}else{
 			HashSet<Integer> newListSubject= new HashSet<>();
-			newListObject.add(indexSub);
+			newListSubject.add(indexSub);
 			Map<Integer, HashSet<Integer>> newDicObject=new HashMap<>();
 			newDicObject.put(indexOb, newListSubject);
 			pos.put(indexPred, newDicObject);
+		}
 
 
 		//OPS
@@ -162,7 +163,7 @@ public class Index {
 			Map<Integer, HashSet<Integer>> dicPredicate= ops.get(indexOb);
 			if(dicPredicate.containsKey(indexPred)) {
 			HashSet<Integer> listSubject=dicPredicate.get(indexPred);
-			if(!listSubject.contains(indexSub)) listSubject.add(indexsub);
+			if(!listSubject.contains(indexSub)) listSubject.add(indexSub);
 			}else {
 			HashSet<Integer> newListSubject= new HashSet<>();
 			newListSubject.add(indexSub);
@@ -174,6 +175,8 @@ public class Index {
 			Map<Integer, HashSet<Integer>> newDicPredicate=new HashMap<>();
 			newDicPredicate.put(indexPred, newListSubject);
 			ops.put(indexOb, newDicPredicate);
+		}
+
 
 	}
 
