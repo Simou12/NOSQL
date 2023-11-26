@@ -56,12 +56,13 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 		subject=st.getSubject().toString();
 		predicate=st.getPredicate()+"";
 		object=st.getObject().toString();
-		System.out.println(subject+" "+predicate+" "+object);
+		//System.out.println(subject+" "+predicate+" "+object);
 		dictionnary.addElement(subject);
 		dictionnary.addElement(predicate);
 		dictionnary.addElement(object);
 		index.addIndex(dictionnary.getDictionnary(), subject, predicate, object);	
 	}
+	
 	
 	
 	

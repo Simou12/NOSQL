@@ -12,11 +12,7 @@ import java.util.HashSet;
 
 public class Index {
 	
-	Map<Integer, Map<Integer, HashSet<Integer>>> spo;
-	Map<Integer, Map<Integer, HashSet<Integer>>> sop;
-	Map<Integer, Map<Integer, HashSet<Integer>>> pso;
 	Map<Integer, Map<Integer, HashSet<Integer>>> pos;
-	Map<Integer, Map<Integer, HashSet<Integer>>> osp;
 	Map<Integer, Map<Integer, HashSet<Integer>>> ops;
 	
 	
@@ -29,39 +25,11 @@ public class Index {
 	
 	public Index() {
 		super();
-		this.spo=new HashMap<>();
-		this.sop=new HashMap<>();
-		this.pso=new HashMap<>();
 		this.pos=new HashMap<>();
-		this.osp=new HashMap<>();
 		this.ops=new HashMap<>();
 		
 	}
 	
-	public Map<Integer, Map<Integer, HashSet<Integer>>> getSpo() {
-		return spo;
-	}
-
-
-	public void HashSetSpo(Map<Integer, Map<Integer, HashSet<Integer>>> spo) {
-		this.spo = spo;
-	}
-
-	public Map<Integer, Map<Integer, HashSet<Integer>>> getSop() {
-		return sop;
-	}
-
-	public void HashSetSop(Map<Integer, Map<Integer, HashSet<Integer>>> sop) {
-		this.sop = sop;
-	}
-
-	public Map<Integer, Map<Integer, HashSet<Integer>>> getPso() {
-		return pso;
-	}
-
-	public void HashSetPso(Map<Integer, Map<Integer, HashSet<Integer>>> pso) {
-		this.pso = pso;
-	}
 
 	public Map<Integer, Map<Integer, HashSet<Integer>>> getPos() {
 		return pos;
@@ -69,20 +37,8 @@ public class Index {
 
 
 
-	public void HashSetPos(Map<Integer, Map<Integer, HashSet<Integer>>> pos) {
+	public void setPos(Map<Integer, Map<Integer, HashSet<Integer>>> pos) {
 		this.pos = pos;
-	}
-
-
-
-	public Map<Integer, Map<Integer, HashSet<Integer>>> getOsp() {
-		return osp;
-	}
-
-
-
-	public void HashSetOsp(Map<Integer, Map<Integer, HashSet<Integer>>> osp) {
-		this.osp = osp;
 	}
 
 
@@ -93,7 +49,7 @@ public class Index {
 
 
 
-	public void HashSetOps(Map<Integer, Map<Integer, HashSet<Integer>>> ops) {
+	public void setOps(Map<Integer, Map<Integer, HashSet<Integer>>> ops) {
 		this.ops = ops;
 	}
 	
@@ -114,27 +70,6 @@ public class Index {
 	             indexOb  = entry.getKey();
 	        }		       	
 		}
-		
-		//spo
-		if(spo.containsKey(indexSub)) {
-			Map<Integer, HashSet<Integer>> dicPredicate= spo.get(indexSub);
-			if(dicPredicate.containsKey(indexPred)) {
-				HashSet<Integer> listObject=dicPredicate.get(indexPred);
-				if(!listObject.contains(indexOb)) listObject.add(indexOb);	
-			}else {
-				HashSet<Integer> newListObject= new HashSet<>();
-				newListObject.add(indexOb);
-				dicPredicate.put(indexPred, newListObject);		
-			}	
-		}else{
-			HashSet<Integer> newListObject= new HashSet<>();
-			newListObject.add(indexOb);
-			Map<Integer, HashSet<Integer>> newDicPredicate=new HashMap<>();
-			newDicPredicate.put(indexPred, newListObject);
-			spo.put(indexSub, newDicPredicate);		
-		}
-		
-		
 		
 	
 	

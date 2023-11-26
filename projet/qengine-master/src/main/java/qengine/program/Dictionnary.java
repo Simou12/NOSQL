@@ -21,13 +21,28 @@ public class Dictionnary {
 		this.dictionnary = dictionnary;
 	}
 	
-	public boolean addElement( String value ) {	
+	public int addElement( String value ) {	
 		if(!this.dictionnary.containsValue(value)) {
 			dictionnary.put(key, value);
 			this.key ++;	
-			return true;
+			return key-1;
 		}
-		return false;
+		return -1;
+	}
+
+	public int getKey(String value) {
+		for (Map.Entry<Integer, String> entry : dictionnary.entrySet()) {
+			//System.out.println("looking for : " + value + "   found : " +entry.getValue());
+			if (entry.getValue().toString().equals(value.toString())) {
+				//System.out.println("           F O U N D   ");
+                return entry.getKey();
+            }
+		}
+		return -1;
+	}
+
+	public String getValue(int key){
+		return dictionnary.get(key);
 	}
 	
 	public void afficherDictionnaire() {

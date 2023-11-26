@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.ObjectUtils.Null;
 import org.eclipse.rdf4j.query.algebra.Projection;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
@@ -54,47 +55,106 @@ final class Main {
 	/**
 	 * Fichier contenant les requêtes sparql
 	 */
-	static final String queryFile = workingDir + "sample_query.queryset";
+	static final String queryFile = workingDir + "STAR_ALL_workload.queryset";
 
 	/**
 	 * Fichier contenant des données rdf
 	 */
-	static final String dataFile = workingDir + "sample_data.nt";
+	static final String dataFile = workingDir + "100K.nt";
 	
 	
 	
 	/**
 	 * Méthode utilisée ici lors du parsing de requête sparql pour agir sur l'objet obtenu.
 	 */
-	public static ArrayList<ArrayList<String>> processAQuery(ParsedQuery query) {
+	public static HashSet<Integer> processAQuery(ParsedQuery query,MainRDFHandler mainRdfHandler) {
 		List<StatementPattern> patterns = StatementPatternCollector.process(query.getTupleExpr());
-		ArrayList<ArrayList<String>> listPatterns = new ArrayList<>();
+		Dictionnary dictionnary = mainRdfHandler.getDictionnary(); 
+		Index index = mainRdfHandler.getIndex();
+		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> ops = index.getOps();
+		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> osp = index.getPos();
 
-		/*for (StatementPattern pattern: patterns) {	
-			
-			listPatterns.addAll(Arrays.asList(pattern.getPredicateVar().toString(), pattern.getObjectVar().toString()));
-			System.out.println("object of the first pattern : " + patterns.get(0).getObjectVar().getValue());
+
+		 
+
+		//System.out.println("first pattern : " + patterns.get(0));
+
+		//System.out.println("object of the first pattern : " + patterns.get(0).getObjectVar().getValue());
+
+		//System.out.println("predicate of the first pattern : " + patterns.get(0).getPredicateVar().getValue());
+
+		//System.out.println("variables to project : ");
 		
-			System.out.println("variables to project : ");
-			
 		
-			// Utilisation d'une classe anonyme
-			query.getTupleExpr().visit(new AbstractQueryModelVisitor<RuntimeException>() {
 		
-				public void meet(Projection projection) {
-					System.out.println(projection.getProjectionElemList().getElements());
+		HashSet<Integer> result ;
+
+		// first pattern 
+
+		int indexOb = dictionnary.getKey(patterns.get(0).getObjectVar().getValue().toString());
+
+
+		int indexPred = dictionnary.getKey(patterns.get(0).getPredicateVar().getValue().toString());
+		//System.out.println("indexOb : " + indexOb + "     indexPred : "+ indexPred);
+		if(ops.containsKey(indexOb)) {
+			java.util.Map<Integer, HashSet<Integer>> dicPredicate= ops.get(indexOb);
+			if(dicPredicate.containsKey(indexPred)) {
+				result=dicPredicate.get(indexPred);
+			}else {
+				return null;
+			}
+		}else {
+			return null;
+		}
+		patterns.remove(0);
+
+		// all other patterns
+
+		for (StatementPattern pattern : patterns){
+			indexOb = dictionnary.getKey(pattern.getObjectVar().getValue().toString());
+			indexPred = dictionnary.getKey(pattern.getPredicateVar().getValue().toString());
+			//System.out.println("indexOb : " + indexOb + "     indexPred : "+ indexPred);
+			if(ops.containsKey(indexOb)) {
+				java.util.Map<Integer, HashSet<Integer>> dicPredicate= ops.get(indexOb);
+				if(dicPredicate.containsKey(indexPred)) {
+
+					result.retainAll(dicPredicate.get(indexPred));
+
+				}else {
+					return null;
 				}
-			});
-		}*/
-		return listPatterns;
+			}else {
+				return null;
+			}
+		}
+		
+		for (int sub : result){
+			System.out.println(dictionnary.getValue(sub));
+		}
+		System.out.println();
+		return result ;
+		
+
+
+		/*// Utilisation d'une classe anonyme
+		query.getTupleExpr().visit(new AbstractQueryModelVisitor<RuntimeException>() {
+
+			public void meet(Projection projection) {
+				System.out.println(projection.getProjectionElemList().getElements());
+			}
+		});*/
 	}
+
+
+
 
 	/**
 	 * Entrée du programme
 	 */
 	public static void main(String[] args) throws Exception {
-		parseData();
-		//parseQueries();
+		MainRDFHandler mainRdfHandler = parseData();
+		System.out.println("hello");
+		parseQueries(mainRdfHandler);
 	}
 
 	// ========================================================================
@@ -102,7 +162,7 @@ final class Main {
 	/**
 	 * Traite chaque requête lue dans {@link #queryFile} avec {@link #processAQuery(ParsedQuery)}.
 	 */
-	private static void parseQueries() throws FileNotFoundException, IOException {
+	private static void parseQueries(MainRDFHandler mainRdfHandler) throws FileNotFoundException, IOException {
 		/**
 		 * Try-with-resources
 		 * 
@@ -116,20 +176,33 @@ final class Main {
 			SPARQLParser sparqlParser = new SPARQLParser();
 			Iterator<String> lineIterator = lineStream.iterator();
 			StringBuilder queryString = new StringBuilder();
-
+			int i = 0;
+			int j = 0;
+			
 			while (lineIterator.hasNext())
+			
 			/*
 			 * On stocke plusieurs lignes jusqu'à ce que l'une d'entre elles se termine par un '}'
 			 * On considère alors que c'est la fin d'une requête
 			 */
 			{
+				j++;
 				String line = lineIterator.next();
 				queryString.append(line);
 
 				if (line.trim().endsWith("}")) {
+					
+					i++;
 					ParsedQuery query = sparqlParser.parseQuery(queryString.toString(), baseURI);
 
-					processAQuery(query); // Traitement de la requête, à adapter/réécrire pour votre programme
+					System.out.println();
+					System.out.println("querry nb : " + i + " with " + j + " patterns"  );
+					processAQuery(query,mainRdfHandler); // Traitement de la requête, à adapter/réécrire pour votre programme
+					System.out.println();
+					j=0;
+			
+
+
 
 					queryString.setLength(0); // Reset le buffer de la requête en chaine vide
 				}
@@ -140,8 +213,10 @@ final class Main {
 	/**
 	 * Traite chaque triple lu dans {@link #dataFile} avec {@link MainRDFHandler}.
 	 */
-	private static void parseData() throws FileNotFoundException, IOException {
+	private static MainRDFHandler parseData() throws FileNotFoundException, IOException {
+
 		try (Reader dataReader = new FileReader(dataFile)) {
+
 			// On va parser des données au format ntriples
 			RDFParser rdfParser = Rio.createParser(RDFFormat.NTRIPLES);
 			MainRDFHandler mainRdfHandler=new MainRDFHandler();
@@ -155,12 +230,10 @@ final class Main {
 			}*/
 			Index index=mainRdfHandler.getIndex();
 			
-		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> spo=index.getSpo();
-		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> sop=index.getSop();
-		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> pso=index.getPso();
 		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> pos=index.getPos();
-		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> osp=index.getOsp();
 		 java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> ops=index.getOps(); 
+
+		 //index.displayMap(pos,"");
 		  
 		/* System.out.println(" Le dictionnaire : \n");
 		 mainRdfHandler.getDictionnary().afficherDictionnaire();
@@ -174,7 +247,7 @@ final class Main {
 		 index.displayMap(osp,"osp");
 		 index.displayMap(ops,"ops");*/
 		 
-		 
+		 return (mainRdfHandler);
 		} 	
 	}
 	
