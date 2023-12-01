@@ -67,12 +67,12 @@ final class Main {
 	/**
 	 * Méthode utilisée ici lors du parsing de requête sparql pour agir sur l'objet obtenu.
 	 */
-	public static HashSet<Integer> processAQuery(ParsedQuery query,MainRDFHandler mainRdfHandler) {
+	public static HashSet<String> processAQuery(ParsedQuery query,MainRDFHandler mainRdfHandler) {
 		List<StatementPattern> patterns = StatementPatternCollector.process(query.getTupleExpr());
 		Dictionnary dictionnary = mainRdfHandler.getDictionnary(); 
 		Index index = mainRdfHandler.getIndex();
 		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> ops = index.getOps();
-		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> osp = index.getPos();
+		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> pos = index.getPos();
 
 
 		 
@@ -92,9 +92,8 @@ final class Main {
 		// first pattern 
 
 		int indexOb = dictionnary.getKey(patterns.get(0).getObjectVar().getValue().toString());
-
-
 		int indexPred = dictionnary.getKey(patterns.get(0).getPredicateVar().getValue().toString());
+		
 		//System.out.println("indexOb : " + indexOb + "     indexPred : "+ indexPred);
 		if(ops.containsKey(indexOb)) {
 			java.util.Map<Integer, HashSet<Integer>> dicPredicate= ops.get(indexOb);
@@ -127,14 +126,14 @@ final class Main {
 				return null;
 			}
 		}
-		
+		HashSet<String> text_result ;
 		for (int sub : result){
-			System.out.println(dictionnary.getValue(sub));
+			String real_sub = dictionnary.getValue(sub)
+			#System.out.println(real_sub);
+			text_result.add(real_sub)
 		}
 		System.out.println();
-		return result ;
-		
-
+		return text_result ;
 
 		/*// Utilisation d'une classe anonyme
 		query.getTupleExpr().visit(new AbstractQueryModelVisitor<RuntimeException>() {
@@ -143,6 +142,7 @@ final class Main {
 				System.out.println(projection.getProjectionElemList().getElements());
 			}
 		});*/
+
 	}
 
 
@@ -197,13 +197,13 @@ final class Main {
 
 					System.out.println();
 					System.out.println("querry nb : " + i + " with " + j + " patterns"  );
-					processAQuery(query,mainRdfHandler); // Traitement de la requête, à adapter/réécrire pour votre programme
+					HashSet<String> results = processAQuery(query,mainRdfHandler); // Traitement de la requête, à adapter/réécrire pour votre programme
 					System.out.println();
+					for (String reponse :results){
+						System.out.println(reponse);
+					}
 					j=0;
-			
-
-
-
+					
 					queryString.setLength(0); // Reset le buffer de la requête en chaine vide
 				}
 			}
