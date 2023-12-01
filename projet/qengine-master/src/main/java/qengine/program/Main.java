@@ -14,7 +14,25 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+
 import org.apache.commons.lang3.ObjectUtils.Null;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+
+
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+
 import org.eclipse.rdf4j.query.algebra.Projection;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
@@ -27,6 +45,8 @@ import org.eclipse.rdf4j.rio.Rio;
 
 import com.github.andrewoma.dexx.collection.HashMap;
 import com.github.andrewoma.dexx.collection.Map;
+
+import riotcmd.infer;
 
 /**
  * Programme simple lisant un fichier de requête et un fichier de données.
@@ -126,11 +146,11 @@ final class Main {
 				return null;
 			}
 		}
-		HashSet<String> text_result ;
+		HashSet<String> text_result = new HashSet<String>();
 		for (int sub : result){
-			String real_sub = dictionnary.getValue(sub)
-			#System.out.println(real_sub);
-			text_result.add(real_sub)
+			String real_sub = dictionnary.getValue(sub);
+			//System.out.println(real_sub);
+			text_result.add(real_sub);
 		}
 		System.out.println();
 		return text_result ;
@@ -146,6 +166,30 @@ final class Main {
 	}
 
 
+	public static HashSet<String> processJENA(String sparqlQueryString, Model model) {
+        // Create a SPARQL query
+        Query query = QueryFactory.create(sparqlQueryString);
+
+        // Create a QueryExecution object to execute the query on the given model
+        try (QueryExecution queryExecution = QueryExecutionFactory.create(query, model)) {
+            // Execute the query and obtain the result set
+            ResultSet resultSet = queryExecution.execSelect();
+
+            // Process and print the results
+			HashSet<String> results = new  HashSet<String>();
+
+            while (resultSet.hasNext()) {
+                QuerySolution solution = resultSet.nextSolution();
+                // Example: Print the value of the variable "?s"
+
+				results.add(solution.get("?v0").toString());
+
+                //System.out.println("Value of ?s: " + solution.get("?v0"));
+                // You can access other variables in a similar way.
+            }
+		return results;
+        }
+    }
 
 
 	/**
@@ -154,15 +198,70 @@ final class Main {
 	public static void main(String[] args) throws Exception {
 		MainRDFHandler mainRdfHandler = parseData();
 		System.out.println("hello");
-		parseQueries(mainRdfHandler);
+		Object[] resultzzz = parseQueries(mainRdfHandler);
+		List<HashSet<String>> results = (List<HashSet<String>>)resultzzz[0];
+		List<String> requettes = (List<String>)resultzzz[1];
+
+		Model model = ModelFactory.createDefaultModel();
+		model.read(dataFile,"N-TRIPLET");
+		List<HashSet<String>> results_jena = parseQueriesJena(model);
+
+		int len = results.size();
+		Boolean complet = true;
+		List<Integer> kaka = new ArrayList<>();
+
+		System.out.println(len);
+		System.out.println(results_jena.size());
+
+		for (int i=0 ; i<len ; i++){
+			//System.out.println(i);
+			if (!(results.get(i) == null) && !(results_jena.get(i) == null)){
+							
+				if (!results.get(i).equals(results_jena.get(i))){
+					complet = false ;
+					kaka.add(i);
+					//System.out.println("M E R D E");
+				}else{
+					//System.out.println("H A M D O U L E H");
+				}		
+			}
+		}
+		
+		if (complet) {
+			System.out.println("H A M D O U L E H");
+		}
+		else{
+			System.out.println("M E R D E");
+
+
+			for (int i:kaka){
+				System.out.println("            case : "+ i);
+				System.out.println();
+				System.out.println(requettes.get(i));
+				System.out.println();
+				System.out.println(" 			our : ");
+				for (String value:results.get(i)){
+					System.out.println(value);
+				}
+				System.out.println(" 			JENA : ");
+				for (String value:results_jena.get(i)){
+					System.out.println(value);
+				}
+			}
+		}
+
+
+
 	}
+
+
 
 	// ========================================================================
 
 	/**
 	 * Traite chaque requête lue dans {@link #queryFile} avec {@link #processAQuery(ParsedQuery)}.
 	 */
-	private static void parseQueries(MainRDFHandler mainRdfHandler) throws FileNotFoundException, IOException {
+	private static Object[] parseQueries(MainRDFHandler mainRdfHandler) throws FileNotFoundException, IOException {
 		/**
 		 * Try-with-resources
 		 * 
@@ -176,8 +275,10 @@ final class Main {
 			SPARQLParser sparqlParser = new SPARQLParser();
 			Iterator<String> lineIterator = lineStream.iterator();
 			StringBuilder queryString = new StringBuilder();
+			List<String> requettes = new ArrayList<>();
 			int i = 0;
 			int j = 0;
+			List<HashSet<String>> all_results = new ArrayList<HashSet<String>>();
 			
 			while (lineIterator.hasNext())
 			
@@ -194,21 +295,67 @@ final class Main {
 					
 					i++;
 					ParsedQuery query = sparqlParser.parseQuery(queryString.toString(), baseURI);
-
-					System.out.println();
+					
+					//System.out.println();
 					System.out.println("querry nb : " + i + " with " + j + " patterns"  );
+					requettes.add(queryString.toString());
 					HashSet<String> results = processAQuery(query,mainRdfHandler); // Traitement de la requête, à adapter/réécrire pour votre programme
+					all_results.add(results);
 					System.out.println();
+					if (! (results==null) ){
 					for (String reponse :results){
 						System.out.println(reponse);
-					}
+					}}
 					j=0;
-					
+
 					queryString.setLength(0); // Reset le buffer de la requête en chaine vide
 				}
 			}
+			Object[] resultzzz = new Object[2];
+			resultzzz[0] = all_results;
+			resultzzz[1]=requettes;
+			return resultzzz;
 		}
 	}
+
+	
+	private static List<HashSet<String>> parseQueriesJena(Model model) throws FileNotFoundException, IOException {
+		
+		try (Stream<String> lineStream = Files.lines(Paths.get(queryFile))) {
+			Iterator<String> lineIterator = lineStream.iterator();
+			StringBuilder queryString = new StringBuilder();
+			int i = 0;
+			int j = 0;
+			List<HashSet<String>> all_results = new ArrayList<HashSet<String>>();
+			
+			while (lineIterator.hasNext())
+			
+			/*
+			 * On stocke plusieurs lignes jusqu'à ce que l'une d'entre elles se termine par un '}'
+			 * On considère alors que c'est la fin d'une requête
+			 */
+			{
+				j++;
+				String line = lineIterator.next();
+				queryString.append(line);
+				String query_str = queryString.toString();
+
+				if (line.trim().endsWith("}")) {
+					
+					i++;
+					//System.out.println("querry nb : " + i   );
+
+					all_results.add(processJENA(query_str, model));
+					j=0;
+
+					queryString.setLength(0); // Reset le buffer de la requête en chaine vide
+				}
+			}
+			return all_results;
+		}
+	}
+
+	
 
 	/**
 	 * Traite chaque triple lu dans {@link #dataFile} avec {@link MainRDFHandler}.
