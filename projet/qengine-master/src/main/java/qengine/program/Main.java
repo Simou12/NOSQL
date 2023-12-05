@@ -93,20 +93,6 @@ final class Main {
 		Index index = mainRdfHandler.getIndex();
 		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> ops = index.getOps();
 		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> pos = index.getPos();
-
-
-		 
-
-		//System.out.println("first pattern : " + patterns.get(0));
-
-		//System.out.println("object of the first pattern : " + patterns.get(0).getObjectVar().getValue());
-
-		//System.out.println("predicate of the first pattern : " + patterns.get(0).getPredicateVar().getValue());
-
-		//System.out.println("variables to project : ");
-		
-		
-		
 		HashSet<Integer> result ;
 
 		// first pattern 
@@ -114,11 +100,12 @@ final class Main {
 		int indexOb = dictionnary.getKey(patterns.get(0).getObjectVar().getValue().toString());
 		int indexPred = dictionnary.getKey(patterns.get(0).getPredicateVar().getValue().toString());
 		
+
 		//System.out.println("indexOb : " + indexOb + "     indexPred : "+ indexPred);
 		if(ops.containsKey(indexOb)) {
 			java.util.Map<Integer, HashSet<Integer>> dicPredicate= ops.get(indexOb);
 			if(dicPredicate.containsKey(indexPred)) {
-				result=dicPredicate.get(indexPred);
+				result=(HashSet)dicPredicate.get(indexPred).clone();
 			}else {
 				return null;
 			}
@@ -126,6 +113,7 @@ final class Main {
 			return null;
 		}
 		patterns.remove(0);
+		
 
 		// all other patterns
 
@@ -136,7 +124,6 @@ final class Main {
 			if(ops.containsKey(indexOb)) {
 				java.util.Map<Integer, HashSet<Integer>> dicPredicate= ops.get(indexOb);
 				if(dicPredicate.containsKey(indexPred)) {
-
 					result.retainAll(dicPredicate.get(indexPred));
 
 				}else {
@@ -152,7 +139,6 @@ final class Main {
 			//System.out.println(real_sub);
 			text_result.add(real_sub);
 		}
-		System.out.println();
 		return text_result ;
 
 		/*// Utilisation d'une classe anonyme
@@ -196,22 +182,25 @@ final class Main {
 	 * Entrée du programme
 	 */
 	public static void main(String[] args) throws Exception {
-		MainRDFHandler mainRdfHandler = parseData();
 		System.out.println("hello");
+		System.out.println("loading data into this system");
+		MainRDFHandler mainRdfHandler = parseData();
+		System.out.println("loading queries and checking them using this system");
 		Object[] resultzzz = parseQueries(mainRdfHandler);
 		List<HashSet<String>> results = (List<HashSet<String>>)resultzzz[0];
 		List<String> requettes = (List<String>)resultzzz[1];
 
 		Model model = ModelFactory.createDefaultModel();
+		System.out.println("loading data into Jena");
 		model.read(dataFile,"N-TRIPLET");
+		System.out.println("checking queries using Jena");
 		List<HashSet<String>> results_jena = parseQueriesJena(model);
 
 		int len = results.size();
 		Boolean complet = true;
 		List<Integer> kaka = new ArrayList<>();
 
-		System.out.println(len);
-		System.out.println(results_jena.size());
+		System.out.println("checked " +  len + " queries");
 
 		for (int i=0 ; i<len ; i++){
 			//System.out.println(i);
@@ -248,6 +237,8 @@ final class Main {
 					System.out.println(value);
 				}
 			}
+
+			if (!mainRdfHandler.index.ops.containsKey(1935)){System.out.println("WHAT WHY WHERE");}
 		}
 
 
@@ -276,8 +267,6 @@ final class Main {
 			Iterator<String> lineIterator = lineStream.iterator();
 			StringBuilder queryString = new StringBuilder();
 			List<String> requettes = new ArrayList<>();
-			int i = 0;
-			int j = 0;
 			List<HashSet<String>> all_results = new ArrayList<HashSet<String>>();
 			
 			while (lineIterator.hasNext())
@@ -287,26 +276,15 @@ final class Main {
 			 * On considère alors que c'est la fin d'une requête
 			 */
 			{
-				j++;
 				String line = lineIterator.next();
 				queryString.append(line);
 
 				if (line.trim().endsWith("}")) {
-					
-					i++;
 					ParsedQuery query = sparqlParser.parseQuery(queryString.toString(), baseURI);
 					
-					//System.out.println();
-					System.out.println("querry nb : " + i + " with " + j + " patterns"  );
 					requettes.add(queryString.toString());
 					HashSet<String> results = processAQuery(query,mainRdfHandler); // Traitement de la requête, à adapter/réécrire pour votre programme
 					all_results.add(results);
-					System.out.println();
-					if (! (results==null) ){
-					for (String reponse :results){
-						System.out.println(reponse);
-					}}
-					j=0;
 
 					queryString.setLength(0); // Reset le buffer de la requête en chaine vide
 				}
@@ -324,8 +302,6 @@ final class Main {
 		try (Stream<String> lineStream = Files.lines(Paths.get(queryFile))) {
 			Iterator<String> lineIterator = lineStream.iterator();
 			StringBuilder queryString = new StringBuilder();
-			int i = 0;
-			int j = 0;
 			List<HashSet<String>> all_results = new ArrayList<HashSet<String>>();
 			
 			while (lineIterator.hasNext())
@@ -335,19 +311,13 @@ final class Main {
 			 * On considère alors que c'est la fin d'une requête
 			 */
 			{
-				j++;
 				String line = lineIterator.next();
 				queryString.append(line);
 				String query_str = queryString.toString();
 
 				if (line.trim().endsWith("}")) {
-					
-					i++;
-					//System.out.println("querry nb : " + i   );
 
 					all_results.add(processJENA(query_str, model));
-					j=0;
-
 					queryString.setLength(0); // Reset le buffer de la requête en chaine vide
 				}
 			}
