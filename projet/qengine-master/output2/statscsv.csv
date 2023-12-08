@@ -8,3 +8,4 @@ data/sample_data.nt,folder : testing,RDF triplets number,10,300,11,0,1 - OPS,0,5
 data/sample_data.nt,folder : testing,RDF triplets number,10,355,12,0,1 - OPS,0,4,1029,6,4,100.0
 data/sample_data.nt,folder : testing,RDF triplets number,10,295,11,1,1 - OPS,0,6,942,6,4,100.0
 data/sample_data.nt,folder : testing,RDF triplets number,10,318,11,0,1 - OPS,0,4,976,6,4,100
+data/sample_data.nt,folder : testing,RDF triplets number,10,288,9,0,1 - OPS,0,8,965,6,4,100

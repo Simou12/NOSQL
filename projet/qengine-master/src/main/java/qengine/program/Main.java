@@ -354,6 +354,7 @@ final class Main {
 		int len = results.size();
 		for (int i=0 ; i<len ; i++){if (results.get(i) == null){ nb_vide++;}else{nb_full++;}}
 
+		System.out.println("printing to " + statscsv);
 		statsToCsv(statscsv,len,data_time,requettes_time,mainRdfHandler.getDic_Time(),mainRdfHandler.getIndex_Time(),check_time,full_time,nb_vide,nb_full,pourcentage_jena);
 		//(String pathFile, int nb_requettes, int data_read_time,int query_read_time,int dic_time,int index_time, int eval_time, int tot_time,int nb_no_rep,int nb_rep)
 		
@@ -532,14 +533,14 @@ final class Main {
 			if (fichier.length() != 0){
 				writer.write(dataFile +","+ qr +","+ "RDF triplets number" +","+ nb_requettes +","+ data_read_time +","+ query_read_time +","+ dic_time +","+ "1 - OPS" +","+ index_time +","+ eval_time +","+ tot_time +","+ nb_no_rep +","+ nb_rep +","+ pourcentage);
 				writer.newLine();
-				System.out.println("exist");
+				//System.out.println("exist");
 			}
 			else{
 				writer.write("\"Data file name\", \"query file name\", \"RDF triplets number\", \"query number\",\"Data reading time(ms)\",\"Query reading time(ms)\" ,\"Dictionary construction time(ms)\", \"Index number\",\"Index creation time\",\"Workload evaluation time (ms)\",\"Total time(ms)\",\"Nb no response request\",\"Nb response\",\"% response equal to Jena\"");	
 				writer.newLine();
 				writer.write(dataFile +","+ qr +","+ "RDF triplets number" +","+ nb_requettes +","+ data_read_time +","+ query_read_time +","+ dic_time +","+ "1 - OPS" +","+ index_time +","+ eval_time +","+ tot_time +","+ nb_no_rep +","+ nb_rep +","+ "100%");
 				writer.newLine();
-				System.out.println("no exist");
+				//System.out.println("no exist");
 			}
 
 		} catch (IOException e) {
