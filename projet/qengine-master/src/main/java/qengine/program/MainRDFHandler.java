@@ -24,6 +24,8 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 public final class MainRDFHandler extends AbstractRDFHandler {
 	
 	String subject,predicate, object;	
+	long dic_time=0;
+	long index_time=0;
 	
 	Dictionnary dictionnary=new Dictionnary();
 	
@@ -46,6 +48,16 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 		this.index = index;
 	}
 
+	public long getDic_Time() {
+		return  dic_time;
+	}
+
+	public long getIndex_Time() {
+		return  index_time;
+	}
+
+
+
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -57,11 +69,22 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 		predicate=st.getPredicate()+"";
 		object=st.getObject().toString();
 		//System.out.println(subject+" "+predicate+" "+object);
+		long start_dic = System.currentTimeMillis();
 		dictionnary.addElement(subject);
 		dictionnary.addElement(predicate);
 		dictionnary.addElement(object);
+		long end_dic = System.currentTimeMillis();
 		index.addIndex(dictionnary.getDictionnary(), subject, predicate, object);	
+		long end_index = System.currentTimeMillis();
+
+		index_time = index_time + end_index- end_dic;
+		dic_time = dic_time + end_dic - start_dic;
+
+
+
 	}
+
+
 	
 	
 	

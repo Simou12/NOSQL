@@ -203,6 +203,7 @@ final class Main {
 	 * Entrée du programme
 	 */
 	public static void main(String[] args) throws Exception {
+		long first_time = System.currentTimeMillis();
 
 		for (int i = 0; i < args.length; i++) {
 			switch (args[i]) {
@@ -240,7 +241,11 @@ final class Main {
 			}
 		}
 		
+
 		System.out.println("loading queries");
+
+		long start_requettes = System.currentTimeMillis();
+
 		List<String> requettes = new ArrayList<String>();
 		if (useFolder) {
 			for (String file : queryFiles){
@@ -252,6 +257,8 @@ final class Main {
 			requettes = parseQueries(queryFile);
 		}
 
+		long requettes_time = System.currentTimeMillis() - start_requettes;
+
 
 		if(shuffle){
 			System.out.println("shuffling");
@@ -259,8 +266,10 @@ final class Main {
 		}
 
 		System.out.println("loading data into this system");
-		MainRDFHandler mainRdfHandler = parseData();
 
+		long start_data = System.currentTimeMillis();
+		MainRDFHandler mainRdfHandler = parseData();
+		long data_time = System.currentTimeMillis() - start_data;
 
 		if(warm>0){
 			System.out.println("	warming up this system");
@@ -269,9 +278,11 @@ final class Main {
 
 
 		System.out.println("	checking queries using this system");
+		long start_check = System.currentTimeMillis();
 		List<HashSet<String>> results = processQueries(mainRdfHandler, requettes);
+		long check_time = System.currentTimeMillis()-start_check;
 
-
+		int pourcentage_jena = -1;
 		if (useJena){
 			Model model = ModelFactory.createDefaultModel();
 			System.out.println("Jena :");
@@ -288,7 +299,7 @@ final class Main {
 
 			int len = results.size();
 			Boolean complet = true;
-			List<Integer> kaka = new ArrayList<>();
+			List<Integer> faute = new ArrayList<>();
 
 			System.out.println("	checked " +  len + " queries");
 
@@ -298,14 +309,14 @@ final class Main {
 								
 					if (!results.get(i).equals(results_jena.get(i))){
 						complet = false ;
-						kaka.add(i);
+						faute.add(i);
 						//System.out.println("M E R D E");
 					}else{
 						//System.out.println("H A M D O U L E H");
 					}		
 				}
 			}
-			
+			pourcentage_jena = 100 - faute.size()/len*100;
 			if (complet) {
 				System.out.println("	the system is complete");
 			}
@@ -313,7 +324,7 @@ final class Main {
 				System.out.println("	the system is caught lacking :");
 
 
-				for (int i:kaka){
+				for (int i:faute){
 					System.out.println("            case : "+ i);
 					System.out.println();
 					System.out.println(requettes.get(i));
@@ -333,8 +344,18 @@ final class Main {
 		}
 
 
+		long full_time = System.currentTimeMillis()-first_time; 
+
 		System.out.println("printing to " + csvFile);
 		resultsToCsv(csvFile, requettes, results);
+
+		int nb_vide = 0;
+		int nb_full =0;
+		int len = results.size();
+		for (int i=0 ; i<len ; i++){if (results.get(i) == null){ nb_vide++;}else{nb_full++;}}
+
+		statsToCsv(statscsv,len,data_time,requettes_time,mainRdfHandler.getDic_Time(),mainRdfHandler.getIndex_Time(),check_time,full_time,nb_vide,nb_full,pourcentage_jena);
+		//(String pathFile, int nb_requettes, int data_read_time,int query_read_time,int dic_time,int index_time, int eval_time, int tot_time,int nb_no_rep,int nb_rep)
 		
 
 
@@ -502,20 +523,23 @@ final class Main {
 		}
 	}
 
-	private static void statsToCsv(String pathFile, int nb_requettes, int data_read_time,int query_read_time,int dic_time,int index_time, int eval_time, int tot_time,int nb_no_rep,int nb_rep) {
+	private static void statsToCsv(String pathFile,int nb_requettes, long data_read_time,long query_read_time,long dic_time,long index_time, long eval_time, long tot_time,int nb_no_rep,int nb_rep,int pourcentage) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathFile,true))) {
 			File fichier = new File(pathFile);
 			String qr;
 			if (useFolder) {qr = "folder : " + queryFolder;} else{qr=queryFile;}
 			
-			if (fichier.exists()){
-				writer.write(dataFile +","+ qr +","+ "RDF triplets number" +","+ nb_requettes +","+ data_read_time +","+ query_read_time +","+ dic_time +","+ "1 - OPS" +","+ index_time +","+ eval_time +","+ tot_time +","+ nb_no_rep +","+ nb_rep +","+ "100%");
+			if (fichier.length() != 0){
+				writer.write(dataFile +","+ qr +","+ "RDF triplets number" +","+ nb_requettes +","+ data_read_time +","+ query_read_time +","+ dic_time +","+ "1 - OPS" +","+ index_time +","+ eval_time +","+ tot_time +","+ nb_no_rep +","+ nb_rep +","+ pourcentage);
 				writer.newLine();
+				System.out.println("exist");
 			}
 			else{
 				writer.write("\"Data file name\", \"query file name\", \"RDF triplets number\", \"query number\",\"Data reading time(ms)\",\"Query reading time(ms)\" ,\"Dictionary construction time(ms)\", \"Index number\",\"Index creation time\",\"Workload evaluation time (ms)\",\"Total time(ms)\",\"Nb no response request\",\"Nb response\",\"% response equal to Jena\"");	
 				writer.newLine();
 				writer.write(dataFile +","+ qr +","+ "RDF triplets number" +","+ nb_requettes +","+ data_read_time +","+ query_read_time +","+ dic_time +","+ "1 - OPS" +","+ index_time +","+ eval_time +","+ tot_time +","+ nb_no_rep +","+ nb_rep +","+ "100%");
+				writer.newLine();
+				System.out.println("no exist");
 			}
 
 		} catch (IOException e) {
