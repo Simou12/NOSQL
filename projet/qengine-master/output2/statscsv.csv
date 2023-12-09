@@ -1,11 +1,7 @@
 "Data file name", "query file name", "RDF triplets number", "query number","Data reading time(ms)","Query reading time(ms)" ,"Dictionary construction time(ms)", "Index number","Index creation time","Workload evaluation time (ms)","Total time(ms)","Nb no response request","Nb response","% response equal to Jena"
-data/sample_data.nt,folder : testing,RDF triplets number,10,300,10,0,1 - OPS,0,5,940,6,4,100%
-data/sample_data.nt,folder : testing,RDF triplets number,10,291,10,0,1 - OPS,1,4,939,6,4,100%
-data/sample_data.nt,folder : testing,RDF triplets number,10,293,11,0,1 - OPS,0,7,968,6,4,100%
-data/sample_data.nt,folder : testing,RDF triplets number,10,323,10,0,1 - OPS,0,5,1007,6,4,0
-data/sample_data.nt,folder : testing,RDF triplets number,10,298,11,0,1 - OPS,0,6,968,6,4,0.0
-data/sample_data.nt,folder : testing,RDF triplets number,10,300,11,0,1 - OPS,0,5,1005,6,4,100.0
-data/sample_data.nt,folder : testing,RDF triplets number,10,355,12,0,1 - OPS,0,4,1029,6,4,100.0
-data/sample_data.nt,folder : testing,RDF triplets number,10,295,11,1,1 - OPS,0,6,942,6,4,100.0
-data/sample_data.nt,folder : testing,RDF triplets number,10,318,11,0,1 - OPS,0,4,976,6,4,100
-data/sample_data.nt,folder : testing,RDF triplets number,10,288,9,0,1 - OPS,0,8,965,6,4,100
+data/sample_data.nt,data/sample_query.queryset,9,5,300,48,0,1 - OPS,0,2,426,3,2,100%
+data/sample_data.nt,folder : testing,18,10,302,10,0,1 - OPS,0,7,437,6,4,-1
+data/100K.nt,folder : testing,18,10,25451,10,10938,1 - OPS,13692,14,25603,2,8,-1
+data/100K.nt,data/STAR_ALL_workload.queryset,2400,1200,25063,60,10631,1 - OPS,13672,324,25713,273,927,-1
+data/100K.nt,data/STAR_ALL_workload.queryset,2400,1200,23367,51,9920,1 - OPS,12693,298,25903,273,927,100
+data/100K.nt,data/STAR_ALL_workload.queryset,107338,1200,24650,53,10460,1 - OPS,13449,312,27050,273,927,100

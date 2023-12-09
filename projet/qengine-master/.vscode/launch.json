@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "qengine.program.Main",
             "projectName": "qengine",
-            "args" : "-output output2/ -jena -warm 40 -shuffle -queries testing"
+            "args" : "-output output2  -warm 40 -shuffle -jena"
         }
     ]
 }

@@ -80,12 +80,12 @@ final class Main {
 	/**
 	 * Fichier contenant les requêtes sparql
 	 */
-	static String queryFile = workingDir + "sample_query.queryset";
+	static String queryFile = workingDir + "STAR_ALL_workload.queryset";
 											//STAR_ALL_workload
 	/**
 	 * Fichier contenant des données rdf
 	 */
-	static String dataFile = workingDir + "sample_data.nt";
+	static String dataFile = workingDir + "100K.nt";
 
 	static HashSet<String> queryFiles;
 	static String queryFolder;
@@ -211,7 +211,7 @@ final class Main {
 				useFolder = true;
 				queryFolder =args[++i];
 				queryFiles = new HashSet(Stream.of(new File(queryFolder ).listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()));
-				System.out.println(queryFolder);
+				//System.out.println(queryFolder);
 				// Gérer le chemin des requêtes
 				break;
 			case "-data":
@@ -220,8 +220,8 @@ final class Main {
 				break;
 			case "-output":
 				outputDir = args[++i];
-				csvFile = outputDir +"csvfile.csv";
-				statscsv = outputDir+"statscsv.csv";
+				csvFile = outputDir +"/csvfile.csv";
+				statscsv = outputDir+"/statscsv.csv";
 				break;
 			case "-jena":
 				useJena = true;
@@ -351,11 +351,19 @@ final class Main {
 
 		int nb_vide = 0;
 		int nb_full =0;
+		
 		int len = results.size();
-		for (int i=0 ; i<len ; i++){if (results.get(i) == null){ nb_vide++;}else{nb_full++;}}
+		//SPARQLParser sparqlParser = new SPARQLParser();
+		//int nb_triplets =0;
+		
+		for (int i=0 ; i<len ; i++){
+			//List<StatementPattern> patterns = StatementPatternCollector.process(sparqlParser.parseQuery(requettes.get(i), baseURI).getTupleExpr());
+			//nb_triplets = nb_triplets + patterns.size();
+			if (results.get(i) == null){ nb_vide++;}else{nb_full++;}
+		}
 
 		System.out.println("printing to " + statscsv);
-		statsToCsv(statscsv,len,data_time,requettes_time,mainRdfHandler.getDic_Time(),mainRdfHandler.getIndex_Time(),check_time,full_time,nb_vide,nb_full,pourcentage_jena);
+		statsToCsv(statscsv,mainRdfHandler.getNb_trip(),len,data_time,requettes_time,mainRdfHandler.getDic_Time(),mainRdfHandler.getIndex_Time(),check_time,full_time,nb_vide,nb_full,pourcentage_jena);
 		//(String pathFile, int nb_requettes, int data_read_time,int query_read_time,int dic_time,int index_time, int eval_time, int tot_time,int nb_no_rep,int nb_rep)
 		
 
@@ -524,21 +532,21 @@ final class Main {
 		}
 	}
 
-	private static void statsToCsv(String pathFile,int nb_requettes, long data_read_time,long query_read_time,long dic_time,long index_time, long eval_time, long tot_time,int nb_no_rep,int nb_rep,int pourcentage) {
+	private static void statsToCsv(String pathFile,int nb_trip,int nb_requettes, long data_read_time,long query_read_time,long dic_time,long index_time, long eval_time, long tot_time,int nb_no_rep,int nb_rep,int pourcentage) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathFile,true))) {
 			File fichier = new File(pathFile);
 			String qr;
 			if (useFolder) {qr = "folder : " + queryFolder;} else{qr=queryFile;}
 			
 			if (fichier.length() != 0){
-				writer.write(dataFile +","+ qr +","+ "RDF triplets number" +","+ nb_requettes +","+ data_read_time +","+ query_read_time +","+ dic_time +","+ "1 - OPS" +","+ index_time +","+ eval_time +","+ tot_time +","+ nb_no_rep +","+ nb_rep +","+ pourcentage);
+				writer.write(dataFile +","+ qr +","+ nb_trip +","+ nb_requettes +","+ data_read_time +","+ query_read_time +","+ dic_time +","+ "1 - OPS" +","+ index_time +","+ eval_time +","+ tot_time +","+ nb_no_rep +","+ nb_rep +","+ pourcentage);
 				writer.newLine();
 				//System.out.println("exist");
 			}
 			else{
 				writer.write("\"Data file name\", \"query file name\", \"RDF triplets number\", \"query number\",\"Data reading time(ms)\",\"Query reading time(ms)\" ,\"Dictionary construction time(ms)\", \"Index number\",\"Index creation time\",\"Workload evaluation time (ms)\",\"Total time(ms)\",\"Nb no response request\",\"Nb response\",\"% response equal to Jena\"");	
 				writer.newLine();
-				writer.write(dataFile +","+ qr +","+ "RDF triplets number" +","+ nb_requettes +","+ data_read_time +","+ query_read_time +","+ dic_time +","+ "1 - OPS" +","+ index_time +","+ eval_time +","+ tot_time +","+ nb_no_rep +","+ nb_rep +","+ "100%");
+				writer.write(dataFile +","+ qr +","+ nb_trip +","+ nb_requettes +","+ data_read_time +","+ query_read_time +","+ dic_time +","+ "1 - OPS" +","+ index_time +","+ eval_time +","+ tot_time +","+ nb_no_rep +","+ nb_rep +","+ pourcentage);
 				writer.newLine();
 				//System.out.println("no exist");
 			}

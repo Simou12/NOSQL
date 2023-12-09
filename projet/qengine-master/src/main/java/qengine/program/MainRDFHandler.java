@@ -26,6 +26,7 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 	String subject,predicate, object;	
 	long dic_time=0;
 	long index_time=0;
+	int nb_trip =0;
 	
 	Dictionnary dictionnary=new Dictionnary();
 	
@@ -56,6 +57,7 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 		return  index_time;
 	}
 
+	public int getNb_trip(){return nb_trip;}
 
 
 
@@ -64,10 +66,11 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 	
 	public void handleStatement(Statement st) {
 		
-	
+		
 		subject=st.getSubject().toString();
 		predicate=st.getPredicate()+"";
 		object=st.getObject().toString();
+		nb_trip++;
 		//System.out.println(subject+" "+predicate+" "+object);
 		long start_dic = System.currentTimeMillis();
 		dictionnary.addElement(subject);
