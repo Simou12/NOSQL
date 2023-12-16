@@ -1,0 +1,13 @@
+"Data file name, ""query file name"", ""RDF triplets number"", ""query number"",""Data reading time(ms)"",""Query reading time(ms)"" ,""Dictionary construction time(ms)"", ""Index number"",""Index creation time"",""Workload evaluation time (ms)"",""Total time(ms)"",""Nb no response request"",""Nb response"",""% response equal to Jena"""
+data/sample_data.nt,data/sample_query.queryset,9,5,300,48,0,1 - OPS,0,2,426,3,2,100%
+data/sample_data.nt,folder : testing,18,10,302,10,0,1 - OPS,0,7,437,6,4,-1
+data/100K.nt,folder : testing,18,10,25451,10,10938,1 - OPS,13692,14,25603,2,8,-1
+data/100K.nt,data/STAR_ALL_workload.queryset,2400,1200,25063,60,10631,1 - OPS,13672,324,25713,273,927,-1
+data/100K.nt,data/STAR_ALL_workload.queryset,2400,1200,23367,51,9920,1 - OPS,12693,298,25903,273,927,100
+data/100K.nt,data/STAR_ALL_workload.queryset,107338,1200,24650,53,10460,1 - OPS,13449,312,27050,273,927,100
+data/100K.nt,data/STAR_ALL_workload.queryset,107338,1200,31666,137,13864,1 - OPS,16981,688,32491,273,927,-1
+data/100K.nt,data/STAR_ALL_workload.queryset,107338,1200,35979,96,16008,1 - OPS,19032,678,36755,273,927,-1
+data/100K.nt,data/STAR_ALL_workload.queryset,107338,1200,28165,122,12236,1 - OPS,15247,299,28586,273,927,-1
+data/100K.nt,data/STAR_ALL_workload.queryset,107338,1200,29996,101,12879,1 - OPS,16433,404,30504,273,927,-1
+data/100K.nt,data/STAR_ALL_workload.queryset,107338,1200,28600,114,12286,1 - OPS,15561,666,29384,273,927,-1
+part3_data/Copie de data_500K.nt,folder : part3_queries,539289,13000,1544079,159,791951,1 - OPS,747549,818,1557057,962,12038,100

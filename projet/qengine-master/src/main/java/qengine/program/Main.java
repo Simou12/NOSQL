@@ -86,6 +86,7 @@ final class Main {
 	 * Fichier contenant des données rdf
 	 */
 	static String dataFile = workingDir + "100K.nt";
+	
 
 	static HashSet<String> queryFiles;
 	static String queryFolder;
@@ -115,14 +116,11 @@ final class Main {
 		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> ops = index.getOps();
 		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> pos = index.getPos();
 		HashSet<Integer> result ;
-
-		// first pattern 
-
+		// first pattern
 		int indexOb = dictionnary.getKey(patterns.get(0).getObjectVar().getValue().toString());
 		int indexPred = dictionnary.getKey(patterns.get(0).getPredicateVar().getValue().toString());
+		if(indexOb==-1 || indexPred==-1 ) return null;
 		
-
-		//System.out.println("indexOb : " + indexOb + "     indexPred : "+ indexPred);
 		if(ops.containsKey(indexOb)) {
 			java.util.Map<Integer, HashSet<Integer>> dicPredicate= ops.get(indexOb);
 			if(dicPredicate.containsKey(indexPred)) {
@@ -154,6 +152,7 @@ final class Main {
 				return null;
 			}
 		}
+		
 		HashSet<String> text_result = new HashSet<String>();
 		for (int sub : result){
 			String real_sub = dictionnary.getValue(sub);

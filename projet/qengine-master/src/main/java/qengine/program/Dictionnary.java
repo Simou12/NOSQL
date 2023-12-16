@@ -6,11 +6,13 @@ import java.util.Map;
 public class Dictionnary {
 	
 	Map<Integer, String> dictionnary;
-	int key=1;
+	Map<String, Integer> dictionnary2;
+	static int key=1;
 
 	public Dictionnary() {
 		super();
-		this.dictionnary = new HashMap<>(); ;
+		this.dictionnary = new HashMap<>(); 
+		this.dictionnary2=new HashMap<>();
 	}
 
 	public Map<Integer, String> getDictionnary() {
@@ -21,9 +23,20 @@ public class Dictionnary {
 		this.dictionnary = dictionnary;
 	}
 	
+	
+	
+	public Map<String, Integer> getDictionnary2() {
+		return dictionnary2;
+	}
+
+	public void setDictionnary2(Map<String, Integer> dictionnary2) {
+		this.dictionnary2 = dictionnary2;
+	}
+
 	public int addElement( String value ) {	
 		if(!this.dictionnary.containsValue(value)) {
-			dictionnary.put(key, value);
+			this.dictionnary.put(key, value);
+			this.dictionnary2.put(value, key) ;	
 			this.key ++;	
 			return key-1;
 		}
@@ -31,18 +44,12 @@ public class Dictionnary {
 	}
 
 	public int getKey(String value) {
-		for (Map.Entry<Integer, String> entry : dictionnary.entrySet()) {
-			//System.out.println("looking for : " + value + "   found : " +entry.getValue());
-			if (entry.getValue().toString().equals(value.toString())) {
-				//System.out.println("           F O U N D   ");
-                return entry.getKey();
-            }
-		}
-		return -1;
+		Object val=this.dictionnary2.get(value);
+		return val !=null  ? (Integer) val : -1; 
 	}
 
 	public String getValue(int key){
-		return dictionnary.get(key);
+		return this.dictionnary.get(key);
 	}
 	
 	public void afficherDictionnaire() {
