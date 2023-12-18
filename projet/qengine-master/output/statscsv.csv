@@ -1,0 +1,8 @@
+"Data file name", "query file name", "RDF triplets number", "query number","Data reading time(ms)","Query reading time(ms)" ,"Dictionary construction time(ms)", "Index number","Index creation time","Workload evaluation time (ms)","Total time(ms)","Nb no response request","Nb response","% response equal to Jena","Jena process time(ms)"
+part3_data/Copie de data_500K.nt,folder : part3_queries,539289,13000,5142,1319,727,1 - OPS,1009,187,20020,962,12038,0.926,8990.0
+part3_data/Copie de data_500K.nt,folder : part3_queries,539289,13000,5576,1308,268,1 - OPS,1515,207,21737,962,12038,0.926,8555.0
+part3_data/Copie de data_500K.nt,folder : part3_queries,539289,13000,5593,1438,322,1 - OPS,1131,185,20319,962,12038,0.926,7057.0
+part3_data/Copie de data_2M.nt,folder : part3_queries,2141798,13000,25720,4921,1069,1 - OPS,8099,501,78925,56,12944,0.9956923076923077,31864.0
+part3_data/Copie de data_2M.nt,folder : part3_queries,2141798,13000,27912,5730,1392,1 - OPS,8898,584,87105,56,12944,0.9956923076923077,34536.0
+part3_data/Copie de data_2M.nt,folder : part3_queries,2141798,13000,25588,4943,1463,1 - OPS,5226,744,90699,56,12944,99.56923076923077,37564.0
+part3_data/Copie de data_2M.nt,folder : part3_queries,2141798,13000,25109,4864,2498,1 - OPS,3751,737,88699,5562,7438,100.0,40452.0

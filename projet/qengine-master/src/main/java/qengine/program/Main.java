@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +52,6 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
 
-import com.github.andrewoma.dexx.collection.HashMap;
 
 import riotcmd.infer;
 
@@ -91,11 +91,16 @@ final class Main {
 	private static Set<String> allResults = new HashSet<>();
 	
 	private static Set<String> resultsJena = new HashSet<>();
+	
+	public static Map<Integer, Integer> sameNBPatternsMap=new HashMap<>();
+	
+	public static int nbRequeteDouble=0;
 
+	
 	public static HashSet<String> processJENA(String sparqlQueryString, Model model) {
 		// Create a SPARQL query
 		Query query = QueryFactory.create(sparqlQueryString);
-
+		
 		// Create a QueryExecution object to execute the query on the given model
 		try (QueryExecution queryExecution = QueryExecutionFactory.create(query, model)) {
 			// Execute the query and obtain the result set
@@ -140,7 +145,6 @@ final class Main {
 		List<ParsedQuery> allQueries = new ArrayList<>();
 		StringBuilder queryString = new StringBuilder();
 		SPARQLParser sparqlParser = new SPARQLParser();
-
 		try (Stream<String> lineStream = Files.lines(Paths.get(queryFilePath))) {
 			lineStream.forEach(line -> {
 				queryString.append(line);
@@ -166,7 +170,10 @@ final class Main {
 	}
 
 	public static Set<String> processAQuery(ParsedQuery query) {
-		List<StatementPattern> patterns = StatementPatternCollector.process(query.getTupleExpr());
+		List<StatementPattern> patterns = StatementPatternCollector.process(query.getTupleExpr());	
+		int nbPatterns=patterns.size();
+		//Nombre de patterns par requêtes
+		sameNBPatternsMap.put(nbPatterns, sameNBPatternsMap.getOrDefault(nbPatterns, 0)+1);
 		java.util.Map<Integer, java.util.Map<Integer, HashSet<Integer>>> pos = index.getPos();
 		HashSet<Integer> result;
 		Set<String> text_result = new HashSet<String>();
@@ -174,7 +181,6 @@ final class Main {
 		int indexOb = dictionnary.getKey(patterns.get(0).getObjectVar().getValue().toString());
 		int indexPred = dictionnary.getKey(patterns.get(0).getPredicateVar().getValue().toString());
 		if (indexOb == -1 || indexPred == -1) {
-			text_result.add("No answer");
 			return text_result;
 		}
 		if (pos.containsKey(indexPred)) {
@@ -182,11 +188,9 @@ final class Main {
 			if (dicPredicate.containsKey(indexOb)) {
 				result = (HashSet) dicPredicate.get(indexOb).clone();
 			} else {
-				text_result.add("No answer");
 				return text_result;
 			}
 		} else {
-			text_result.add("No answer");
 			return text_result;
 		}
 		patterns.remove(0);
@@ -201,11 +205,10 @@ final class Main {
 				if (dicPredicate.containsKey(indexOb)) {
 					result.retainAll(dicPredicate.get(indexOb));
 				} else {
-					text_result.add("No answer");
+					
 					return text_result;
 				}
 			} else {
-				text_result.add("No answer");
 				return text_result;
 			}
 		}
@@ -214,13 +217,22 @@ final class Main {
 		return text_result;
 	}
 
-	private static List<Set<String>> processQueries(List<ParsedQuery> requettes)
-			throws FileNotFoundException, IOException {
+	private static List<Set<String>> processQueries(List<ParsedQuery> requettes) throws FileNotFoundException, IOException {
 		List<Set<String>> all_results = new ArrayList<Set<String>>();
 		Set<String> results = new HashSet<>();
+		Set<String> doublons=new HashSet<>();
+		List<String> listDoubEliminie=new ArrayList<>();
+		String req="";
 		for (ParsedQuery requette : requettes) {
 			results = processAQuery(requette); // Traitement de la requête, à adapter/réécrire // pour votre programme
 			all_results.add(results);
+			req=requette.getSourceString().replaceAll("\\s", "");
+			//doublons
+			if(!doublons.add(req) && !listDoubEliminie.contains(req)) {
+				nbRequeteDouble++;
+				listDoubEliminie.add(req);
+			}
+			
 		}
 		return all_results;
 	}
@@ -240,23 +252,6 @@ final class Main {
 			// System.out.println("je warm avec la requete: " + query);
 			// Traitement de la requête pour le warm-up
 			processAQuery(query);
-		}
-		System.out.println("		Warm up terminé");
-	}
-
-	private static void warmUpJena(Model model, List<String> queries, int warmPercentage) throws IOException {
-		if (warmPercentage <= 0 || warmPercentage > 100) {
-			System.out.println("		Invalide pourcentage warm-up, warm-up ignoré.");
-			return;
-		}
-		int numberOfQueriesToRun = (int) Math.ceil((double) queries.size() * warmPercentage / 100);
-		System.out.println("		warming with " + numberOfQueriesToRun + " queries");
-		// Collections.shuffle(queries); // Mélanger la liste des requêtes
-		List<String> selectedQueries = queries.stream().limit(numberOfQueriesToRun).collect(Collectors.toList());
-		SPARQLParser sparqlParser = new SPARQLParser();
-
-		for (String query : selectedQueries) {
-			processJENA(query, model);
 		}
 		System.out.println("		Warm up terminé");
 	}
@@ -385,7 +380,7 @@ final class Main {
 		for (ParsedQuery requette : requettes) {
 			startCheckSystem = System.currentTimeMillis();
 			results = processAQuery(requette);
-			if (results.contains("No answer"))
+			if (results.isEmpty())
 				nb_vide++;
 			else
 				nb_full++;
@@ -396,6 +391,8 @@ final class Main {
 				resultsJena = processJENA(requette.getSourceString(), model);
 				endCheckJena += (System.currentTimeMillis() - startCheckJena);
 			}
+			System.out.println("Jena"+resultsJena );
+			System.out.println("Us "+results );
 			if (results.equals(resultsJena)) {
 				nbEqualReqJena++;
 			}
@@ -410,7 +407,7 @@ final class Main {
 
 		statsToCsv(statscsv, mainRdfHandler.getNb_trip(), requettes.size(), data_time, requettes_time,
 				mainRdfHandler.getDic_Time(), mainRdfHandler.getIndex_Time(), endCheckSystem, full_time, nb_vide,
-				nb_full, pourcentage_jena, endCheckJena);
+				nb_full, pourcentage_jena*100.0, endCheckJena);
 
 	}
 
