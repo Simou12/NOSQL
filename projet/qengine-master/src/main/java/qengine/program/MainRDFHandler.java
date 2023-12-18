@@ -22,15 +22,18 @@ import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
  */
 
 public final class MainRDFHandler extends AbstractRDFHandler {
-	
-	String subject,predicate, object;	
+
 	long dic_time=0;
 	long index_time=0;
 	int nb_trip =0;
+	Dictionnary dictionnary;
+	Index index;
 	
-	Dictionnary dictionnary=new Dictionnary();
+	public MainRDFHandler() {
+		this.dictionnary= new Dictionnary();
+		this.index=new Index();
+	}
 	
-	Index index=new Index();
 	
 	public Dictionnary getDictionnary() {
 		return dictionnary;
@@ -44,7 +47,6 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 		return index;
 	}
 
-
 	public void setIndex(Index index) {
 		this.index = index;
 	}
@@ -57,34 +59,23 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 		return  index_time;
 	}
 
-	public int getNb_trip(){return nb_trip;}
+	public int getNb_trip(){
+		return nb_trip;
+	}
 
-
-
-	@SuppressWarnings("deprecation")
+	
 	@Override
 	
-	public void handleStatement(Statement st) {
-		
-		
-		subject=st.getSubject().toString();
-		predicate=st.getPredicate()+"";
-		object=st.getObject().toString();
+	public void handleStatement(Statement st) {	
 		nb_trip++;
 		//System.out.println(subject+" "+predicate+" "+object);
 		long start_dic = System.currentTimeMillis();
-		dictionnary.addElement(subject);
-		dictionnary.addElement(predicate);
-		dictionnary.addElement(object);
+		dictionnary.constructDic(st);
 		long end_dic = System.currentTimeMillis();
-		index.addIndex(dictionnary.getDictionnary(), subject, predicate, object);	
+		index.addIndex(st, this.dictionnary);	
 		long end_index = System.currentTimeMillis();
-
 		index_time = index_time + end_index- end_dic;
 		dic_time = dic_time + end_dic - start_dic;
-
-
-
 	}
 
 

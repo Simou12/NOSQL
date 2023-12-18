@@ -8,25 +8,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.eclipse.rdf4j.model.Statement;
+
 import java.util.HashSet;
 
 public class Index {
 	
 	Map<Integer, Map<Integer, HashSet<Integer>>> pos;
 	Map<Integer, Map<Integer, HashSet<Integer>>> ops;
-	
-	
-	/*private HashSet<HashSet<Integer>> spo;
-	private HashSet<HashSet<Integer>> sop;
-	private HashSet<HashSet<Integer>> pso;
-	private HashSet<HashSet<Integer>> pos;
-	private HashSet<HashSet<Integer>> osp; 
-	private HashSet<HashSet<Integer>> ops; */
+	Map<Integer, Map<Integer, HashSet<Integer>>> spo;
+	Map<Integer, Map<Integer, HashSet<Integer>>> pso;	
+	Map<Integer, Map<Integer, HashSet<Integer>>> osp;
+	Map<Integer, Map<Integer, HashSet<Integer>>> sop;
 	
 	public Index() {
 		super();
 		this.pos=new HashMap<>();
 		this.ops=new HashMap<>();
+		this.spo=new HashMap<>();
+		this.pso=new HashMap<>();
+		this.osp=new HashMap<>();
+		this.sop=new HashMap<>();
 		
 	}
 	
@@ -53,70 +56,27 @@ public class Index {
 		this.ops = ops;
 	}
 	
-	public void addIndex(Map<Integer, String> map, String subject, String predicate ,String object ) {
-		int indexSub, indexPred, indexOb;
-		indexSub=0;
-		indexPred=0;
-		indexOb=0;
-		
-		for (Map.Entry<Integer, String> entry : map.entrySet()) {
-			 if (entry.getValue().equals(subject)) {
-	             indexSub = entry.getKey();
-	        } 
-	        if (entry.getValue().equals(predicate)) {
-	             indexPred = entry.getKey();               
-	        }
-	        if (entry.getValue().equals(object)) {
-	             indexOb  = entry.getKey();
-	        }		       	
-		}
-		
+	public void addValToIndex(Map<Integer, Map<Integer, HashSet<Integer>>> index, Integer key1, Integer key2, Integer value) {
+		 index.computeIfAbsent(key1, k -> new HashMap<>())
+        .computeIfAbsent(key2, k -> new HashSet<>())
+        .add(value);
+	}
 	
-	
-		//POS
-		if(pos.containsKey(indexPred)) {
-			Map<Integer, HashSet<Integer>> dicObject= pos.get(indexPred);
-			if(dicObject.containsKey(indexOb)) {
-			HashSet<Integer> listSubject=dicObject.get(indexOb);
-			if(!listSubject.contains(indexSub)) listSubject.add(indexSub);
-			}else {
-			HashSet<Integer> newListSubject= new HashSet<>();
-			newListSubject.add(indexSub);
-			dicObject.put(indexOb, newListSubject);
-			}
-		}else{
-			HashSet<Integer> newListSubject= new HashSet<>();
-			newListSubject.add(indexSub);
-			Map<Integer, HashSet<Integer>> newDicObject=new HashMap<>();
-			newDicObject.put(indexOb, newListSubject);
-			pos.put(indexPred, newDicObject);
-		}
-
-
-		//OPS
-		if(ops.containsKey(indexOb)) {
-			Map<Integer, HashSet<Integer>> dicPredicate= ops.get(indexOb);
-			if(dicPredicate.containsKey(indexPred)) {
-			HashSet<Integer> listSubject=dicPredicate.get(indexPred);
-			if(!listSubject.contains(indexSub)) listSubject.add(indexSub);
-			}else {
-			HashSet<Integer> newListSubject= new HashSet<>();
-			newListSubject.add(indexSub);
-			dicPredicate.put(indexPred, newListSubject);
-			}
-		}else{
-			HashSet<Integer> newListSubject= new HashSet<>();
-			newListSubject.add(indexSub);
-			Map<Integer, HashSet<Integer>> newDicPredicate=new HashMap<>();
-			newDicPredicate.put(indexPred, newListSubject);
-			ops.put(indexOb, newDicPredicate);
-		}
-
-
+	public void addIndex(Statement st, Dictionnary dictionnary) {
+		int indexSub=dictionnary.getKey(st.getSubject().toString());
+		int indexPred=dictionnary.getKey(st.getPredicate()+"");
+		int indexOb=dictionnary.getKey(st.getObject().toString());
+		
+		addValToIndex(ops, indexOb, indexPred, indexSub);
+		addValToIndex(pos, indexPred, indexOb, indexSub);
+		addValToIndex(spo, indexSub, indexPred, indexOb);
+		addValToIndex(pso, indexPred, indexSub, indexOb);
+		addValToIndex(sop, indexSub, indexOb, indexPred);
+		addValToIndex(osp, indexOb, indexSub, indexPred);		
 	}
 
 
-	public  void displayMap(Map<Integer, Map<Integer, HashSet<Integer>>> dic, String nom) {
+	/*public  void displayMap(Map<Integer, Map<Integer, HashSet<Integer>>> dic, String nom) {
 		System.out.println(nom.toUpperCase()+"\n");
         for (Map.Entry<Integer, Map<Integer, HashSet<Integer>>> entry : dic.entrySet()) {
             Integer key1 = entry.getKey();
@@ -127,11 +87,10 @@ public class Index {
             for (Map.Entry<Integer, HashSet<Integer>> innerEntry : innerMap.entrySet()) {
                 Integer key2 = innerEntry.getKey();
                 HashSet<Integer> set = innerEntry.getValue();
-
                 System.out.println("   Clé interne: " + key2 + ", Ensemble de valeurs: " + set);
             }
         }
-    }
+    }*/
 		
 		
 		
