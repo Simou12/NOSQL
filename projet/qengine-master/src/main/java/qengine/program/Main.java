@@ -111,12 +111,10 @@ final class Main {
 
 			while (resultSet.hasNext()) {
 				QuerySolution solution = resultSet.nextSolution();
-				// Example: Print the value of the variable "?s"
+				
 
 				results.add(solution.get("?v0").toString());
 
-				// System.out.println("Value of ?s: " + solution.get("?v0"));
-				// You can access other variables in a similar way.
 			}
 			return results;
 		}
@@ -130,11 +128,10 @@ final class Main {
 			RDFParser rdfParser = Rio.createParser(RDFFormat.NTRIPLES);
 			MainRDFHandler mainRdfHandler = new MainRDFHandler();
 			// On utilise notre implémentation de handler
-			System.out.println("début dic");
 			rdfParser.setRDFHandler(mainRdfHandler);
 			// Parsing et traitement de chaque triple par le handler
 			rdfParser.parse(dataReader, baseURI);
-			System.out.println("fin dic");
+			
 			dictionnary = mainRdfHandler.getDictionnary();
 			index = mainRdfHandler.getIndex();
 			return (mainRdfHandler);
@@ -180,37 +177,26 @@ final class Main {
 		// first pattern
 		int indexOb = dictionnary.getKey(patterns.get(0).getObjectVar().getValue().toString());
 		int indexPred = dictionnary.getKey(patterns.get(0).getPredicateVar().getValue().toString());
-		if (indexOb == -1 || indexPred == -1) {
-			return text_result;
-		}
+		if (indexOb == -1 || indexPred == -1) return text_result;	
 		if (pos.containsKey(indexPred)) {
 			java.util.Map<Integer, HashSet<Integer>> dicPredicate = pos.get(indexPred);
-			if (dicPredicate.containsKey(indexOb)) {
-				result = (HashSet) dicPredicate.get(indexOb).clone();
-			} else {
-				return text_result;
-			}
-		} else {
-			return text_result;
-		}
+			if (dicPredicate.containsKey(indexOb)) result = (HashSet) dicPredicate.get(indexOb).clone();
+			else return text_result;			
+		} else return text_result;
+		
 		patterns.remove(0);
 
 		// all other patterns
 		for (StatementPattern pattern : patterns) {
 			indexOb = dictionnary.getKey(pattern.getObjectVar().getValue().toString());
 			indexPred = dictionnary.getKey(pattern.getPredicateVar().getValue().toString());
-			// System.out.println("indexOb : " + indexOb + " indexPred : "+ indexPred);
+			
 			if (pos.containsKey(indexPred)) {
 				java.util.Map<Integer, HashSet<Integer>> dicPredicate = pos.get(indexPred);
-				if (dicPredicate.containsKey(indexOb)) {
-					result.retainAll(dicPredicate.get(indexOb));
-				} else {
-					
-					return text_result;
-				}
-			} else {
-				return text_result;
-			}
+				if (dicPredicate.containsKey(indexOb)) result.retainAll(dicPredicate.get(indexOb));
+				else return text_result;				
+			}else return text_result;
+			
 		}
 		text_result = result.stream().map(dictionnary.getDictionnary()::get).collect(Collectors.toSet());
 		// int --> String
@@ -238,28 +224,16 @@ final class Main {
 	}
 
 	private static void warmUpSystem(List<ParsedQuery> queries, int warmPercentage) throws IOException {
-		if (warmPercentage <= 0 || warmPercentage > 100) {
-			System.out.println("		Invalide pourcentage warm-up, warm-up ignoré.");
-			return;
-		}
+		if (warmPercentage <= 0 || warmPercentage > 100) return;	
 		int numberOfQueriesToRun = (int) Math.ceil((double) queries.size() * warmPercentage / 100);
-		System.out.println("		warming with " + numberOfQueriesToRun + " queries");
-		// Collections.shuffle(queries); // Mélanger la liste des requêtes
 		List<ParsedQuery> selectedQueries = queries.stream().limit(numberOfQueriesToRun).collect(Collectors.toList());
 		SPARQLParser sparqlParser = new SPARQLParser();
-
-		for (ParsedQuery query : selectedQueries) {
-			// System.out.println("je warm avec la requete: " + query);
-			// Traitement de la requête pour le warm-up
-			processAQuery(query);
-		}
-		System.out.println("		Warm up terminé");
+		for (ParsedQuery query : selectedQueries) processAQuery(query);			
 	}
 
 	private static void resultsToCsv(String pathFile, List<ParsedQuery> requettes, List<Set<String>> results) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathFile, false))) {
 			writer.write("\"Request\",\"Results\"");
-
 			int length = requettes.size();
 			for (int i = 0; i < length; i++) {
 				writer.newLine();
@@ -285,7 +259,7 @@ final class Main {
 						+ query_read_time + "," + dic_time + "," + "1 - OPS" + "," + index_time + "," + eval_time + ","
 						+ tot_time + "," + nb_no_rep + "," + nb_rep + "," + pourcentage + "," + timeJena);
 				writer.newLine();
-				// System.out.println("exist");
+			
 			} else {
 				writer.write(
 						"\"Data file name\", \"query file name\", \"RDF triplets number\", \"query number\",\"Data reading time(ms)\",\"Query reading time(ms)\" ,\"Dictionary construction time(ms)\", \"Index number\",\"Index creation time\",\"Workload evaluation time (ms)\",\"Total time(ms)\",\"Nb no response request\",\"Nb response\",\"% response equal to Jena\",\"Jena process time(ms)\"");
@@ -294,7 +268,7 @@ final class Main {
 						+ query_read_time + "," + dic_time + "," + "1 - OPS" + "," + index_time + "," + eval_time + ","
 						+ tot_time + "," + nb_no_rep + "," + nb_rep + "," + pourcentage + "," + timeJena);
 				writer.newLine();
-				// System.out.println("no exist");
+				
 			}
 		} catch (IOException e) {
 			System.err.println("Erreur lors de la création ou de l'écriture dans le fichier CSV : " + e.getMessage());
@@ -312,7 +286,6 @@ final class Main {
 			case "-queries":
 				useFolder = true;
 				queryFolder = args[++i];
-				// System.out.println(queryFolder);
 				// Gérer le chemin des requêtes
 				break;
 			case "-data":
@@ -342,8 +315,6 @@ final class Main {
 			}
 		}
 
-		System.out.println("loading queries");
-
 		long start_data = System.currentTimeMillis();
 		MainRDFHandler mainRdfHandler = parseData();
 		long data_time = System.currentTimeMillis() - start_data;
@@ -359,19 +330,9 @@ final class Main {
 
 		long requettes_time = System.currentTimeMillis() - start_requettes;
 
-		if (shuffle) {
-			System.out.println("shuffling");
-			Collections.shuffle(requettes);
-		}
+		if (shuffle) Collections.shuffle(requettes);
 
-		System.out.println("loading data into this system");
-
-		if (warm > 0) {
-			System.out.println("	warming up this system");
-			warmUpSystem(requettes, warm);
-		}
-
-		System.out.println("	checking queries using this system");
+		if (warm > 0) warmUpSystem(requettes, warm);
 
 		if (useJena) {
 			model = ModelFactory.createDefaultModel();
@@ -380,10 +341,8 @@ final class Main {
 		for (ParsedQuery requette : requettes) {
 			startCheckSystem = System.currentTimeMillis();
 			results = processAQuery(requette);
-			if (results.isEmpty())
-				nb_vide++;
-			else
-				nb_full++;
+			if (results.isEmpty()) nb_vide++;
+			else nb_full++;
 			endCheckSystem += System.currentTimeMillis() - startCheckSystem;
 			allResults.addAll(results);
 			if (useJena) {
@@ -391,24 +350,14 @@ final class Main {
 				resultsJena = processJENA(requette.getSourceString(), model);
 				endCheckJena += (System.currentTimeMillis() - startCheckJena);
 			}
-			System.out.println("Jena"+resultsJena );
-			System.out.println("Us "+results );
-			if (results.equals(resultsJena)) {
-				nbEqualReqJena++;
-			}
+			if (results.equals(resultsJena)) nbEqualReqJena++;			
 		}
 		pourcentage_jena = (double) nbEqualReqJena / (double) requettes.size();
 		long full_time = System.currentTimeMillis() - first_time;
 
-		System.out.println("printing to " + csvFile);
-		// resultsToCsv(csvFile, requettes, allResults);
-
-		System.out.println("printing to " + statscsv);
-
 		statsToCsv(statscsv, mainRdfHandler.getNb_trip(), requettes.size(), data_time, requettes_time,
 				mainRdfHandler.getDic_Time(), mainRdfHandler.getIndex_Time(), endCheckSystem, full_time, nb_vide,
 				nb_full, pourcentage_jena*100.0, endCheckJena);
-
 	}
 
 }

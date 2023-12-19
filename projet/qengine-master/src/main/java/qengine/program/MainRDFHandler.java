@@ -68,7 +68,7 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 	
 	public void handleStatement(Statement st) {	
 		nb_trip++;
-		//System.out.println(subject+" "+predicate+" "+object);
+		
 		long start_dic = System.currentTimeMillis();
 		dictionnary.constructDic(st);
 		long end_dic = System.currentTimeMillis();
