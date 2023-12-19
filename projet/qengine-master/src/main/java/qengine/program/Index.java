@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.rdf4j.model.Statement;
 
@@ -33,24 +34,17 @@ public class Index {
 		
 	}
 	
-
 	public Map<Integer, Map<Integer, HashSet<Integer>>> getPos() {
 		return pos;
 	}
-
-
 
 	public void setPos(Map<Integer, Map<Integer, HashSet<Integer>>> pos) {
 		this.pos = pos;
 	}
 
-
-
 	public Map<Integer, Map<Integer, HashSet<Integer>>> getOps() {
 		return ops;
 	}
-
-
 
 	public void setOps(Map<Integer, Map<Integer, HashSet<Integer>>> ops) {
 		this.ops = ops;
@@ -65,8 +59,7 @@ public class Index {
 	public void addIndex(Statement st, Dictionnary dictionnary) {
 		int indexSub=dictionnary.getKey(st.getSubject().toString());
 		int indexPred=dictionnary.getKey(st.getPredicate()+"");
-		int indexOb=dictionnary.getKey(st.getObject().toString());
-		
+		int indexOb=dictionnary.getKey(st.getObject().toString());	
 		addValToIndex(ops, indexOb, indexPred, indexSub);
 		addValToIndex(pos, indexPred, indexOb, indexSub);
 		addValToIndex(spo, indexSub, indexPred, indexOb);
@@ -74,24 +67,9 @@ public class Index {
 		addValToIndex(sop, indexSub, indexOb, indexPred);
 		addValToIndex(osp, indexOb, indexSub, indexPred);		
 	}
+	
 
-
-	/*public  void displayMap(Map<Integer, Map<Integer, HashSet<Integer>>> dic, String nom) {
-		System.out.println(nom.toUpperCase()+"\n");
-        for (Map.Entry<Integer, Map<Integer, HashSet<Integer>>> entry : dic.entrySet()) {
-            Integer key1 = entry.getKey();
-            Map<Integer, HashSet<Integer>> innerMap = entry.getValue();
-
-            System.out.println("Clé externe: " + key1);
-
-            for (Map.Entry<Integer, HashSet<Integer>> innerEntry : innerMap.entrySet()) {
-                Integer key2 = innerEntry.getKey();
-                HashSet<Integer> set = innerEntry.getValue();
-                System.out.println("   Clé interne: " + key2 + ", Ensemble de valeurs: " + set);
-            }
-        }
-    }*/
-		
+	
 		
 		
 }
