@@ -70,7 +70,8 @@ final class Main {
 
 	static int warm = 0, nbQueriesSameNbPatterns = 0, nbRequeteDouble = 0, nbPatterns=0, nbQueriesPerSeconde=0;
 	
-	static long startTimePattern=0, endTimePattern=0, ramTotalPattern=0, ramUtilisePattern=0;
+	static long startTimePattern=0, endTimePattern=0, ramTotalPattern=0;
+	static double ramUtilisePattern=0;
 
 	static Dictionnary dictionnary;
 
@@ -86,7 +87,7 @@ final class Main {
 
 	public static Map<Integer, Long> timeTotPerPatternMap = new HashMap<>();
 	
-	public static Map<Integer, Long> ramTotPerPatternMap = new HashMap<>();
+	public static Map<Integer, Double> ramTotPerPatternMap = new HashMap<>();
 
 	public static HashSet<String> processJENA(String sparqlQueryString, Model model) {
 		// Create a SPARQL query
@@ -192,10 +193,11 @@ final class Main {
 		}
 		// int --> String
 		text_result = result.stream().map(dictionnary.getDictionnary()::get).collect(Collectors.toSet());
-		ramUtilisePattern = (ramTotalPattern - runtime.freeMemory())/(1000000000);
-		ramTotPerPatternMap.put(nbPatterns, ramTotPerPatternMap.getOrDefault(nbPatterns, (long) 0.0)+ramUtilisePattern);
+		ramUtilisePattern = (double)( runtime.totalMemory()-runtime.freeMemory() - ramTotalPattern )/(1000000000.00);
+		ramTotPerPatternMap.put(nbPatterns, ramTotPerPatternMap.getOrDefault(nbPatterns, (double) 0.0)+ramUtilisePattern);
 		endTimePattern=System.currentTimeMillis()-startTimePattern;
-		timeTotPerPatternMap.put(nbPatterns, timeTotPerPatternMap.getOrDefault(nbPatterns,(long) 0.0 )+endTimePattern);		
+		timeTotPerPatternMap.put(nbPatterns, timeTotPerPatternMap.getOrDefault(nbPatterns,(long) 0.0 )+endTimePattern);	
+		
 		return text_result;
 	}
 
@@ -250,7 +252,7 @@ final class Main {
 	}
 	
 	private static void statsToCsv(String pathFile,String warmType,int nb_trip, int nb_requettes, long data_read_time, long query_read_time, int nbQueriesPerSeconde, long dic_time, long index_time, long eval_time, long tot_time, int nb_no_rep,
-			int nb_rep, double pourcentage, double timeJena, String nbQueriesSamePatterns, int nbRequeteDouble, String tempsPattern, String ramPattern,long memoireUtilisee,  int nbTotalPattern) {
+			int nb_rep, double pourcentage, double timeJena, String nbQueriesSamePatterns, int nbRequeteDouble, String tempsPattern, String ramPattern,double memoireUtilisee,  int nbTotalPattern) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathFile, true))) {
 			File fichier = new File(pathFile);
 			String qr;
@@ -281,15 +283,15 @@ final class Main {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		long full_time, first_time,  memoireTotale;	
+		long full_time, first_time,  memoireStart;	
 		String warmType="";
 		Runtime runtime = Runtime.getRuntime();
-		memoireTotale = runtime.totalMemory()-runtime.freeMemory();
+		memoireStart = runtime.totalMemory()-runtime.freeMemory();
 	    first_time = System.currentTimeMillis();
 		int nbEqualReqJena = 0, nb_vide = 0, nb_full = 0, nbTotalPattern=0;
 		Model model = null;
-		double pourcentage_jena = 0.0;
-		long startCheckJena = 0, endCheckJena = 0, startCheckSystem = 0, endCheckSystem = 0, memoireUtilisee=0, requettes_time, start_data, data_time, start_requettes;
+		double pourcentage_jena = 0.0, memoireUtilisee=0.0;
+		long startCheckJena = 0, endCheckJena = 0, startCheckSystem = 0, endCheckSystem = 0, requettes_time, start_data, data_time, start_requettes;
 		String nbRequetePattern, ramPattern, timeExec100Req;
 		for (int i = 0; i < args.length; i++) {
 			switch (args[i]) {
@@ -382,10 +384,8 @@ final class Main {
                             return (long) (entry.getValue() * (double) tempsTotalExecution / entry.getValue() * 100);
                         }
              ));
-
- 
-		
-	    memoireUtilisee = ( (runtime.totalMemory() - runtime.freeMemory()) - memoireTotale)/(1000000000);
+		Long memoireEnd=runtime.totalMemory() - runtime.freeMemory();
+	    memoireUtilisee = (double )(memoireEnd - memoireStart)/(1000000000.0);
 		pourcentage_jena = (double) nbEqualReqJena / (double) requettes.size();
 	    full_time = System.currentTimeMillis() - first_time;
 	    String nbReqSamePattern= "{" + sameNBPatternsMap.entrySet().stream().map(entry -> entry.getKey() + "->" +entry.getValue()).collect(Collectors.joining("      |   ")) + "}";
