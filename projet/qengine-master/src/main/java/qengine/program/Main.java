@@ -163,7 +163,7 @@ final class Main {
 	public static Set<String> processAQuery(ParsedQuery query) {		
 		List<StatementPattern> patterns = StatementPatternCollector.process(query.getTupleExpr());	
 		startTimePattern=System.currentTimeMillis();
-		runtime.gc();
+		//runtime.gc();
 		ramTotalPattern = runtime.totalMemory()-runtime.freeMemory();
 		nbPatterns = patterns.size();
 		// Nombre de patterns par requêtes
@@ -288,7 +288,7 @@ final class Main {
 	
 	public static void main(String[] args) throws Exception {
 		long full_time, first_time,  memoireTotale;	
-		runtime.gc();
+		//runtime.gc();
 		memoireTotale = runtime.totalMemory()-runtime.freeMemory();
 	    first_time = System.currentTimeMillis();
 		int nbEqualReqJena = 0, nb_vide = 0, nb_full = 0;
