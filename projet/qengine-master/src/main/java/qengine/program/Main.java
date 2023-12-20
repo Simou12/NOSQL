@@ -68,9 +68,8 @@ final class Main {
 
 	static boolean useFolder = false, useJena = false, shuffle = false;
 
-	static int warm = 0, nbQueriesSameNbPatterns = 0, nbRequeteDouble = 0, nbPatterns=0;
-	static long startTimePattern=0;
-	static long endTimePattern=0;
+	static int warm = 0, nbQueriesSameNbPatterns = 0, nbRequeteDouble = 0, nbPatterns=0, nbQueriesPerSeconde=0;
+	static long startTimePattern=0, endTimePattern=0, ramTotalPattern=0, ramUtilisePattern=0;
 
 	static Dictionnary dictionnary;
 
@@ -85,6 +84,8 @@ final class Main {
 	public static Map<Integer, Integer> sameNBPatternsMap = new HashMap<>();
 
 	public static Map<Integer, Long> timeTotPerPatternMap = new HashMap<>();
+	public static Map<Integer, Long> ramTotPerPatternMap = new HashMap<>();
+	public static Runtime runtime = Runtime.getRuntime();
 
 	public static int countQueriesSameNbPatterns() {
 		return sameNBPatternsMap.entrySet().stream().filter(entry -> entry.getKey() > 1).mapToInt(Map.Entry::getValue)
@@ -131,7 +132,6 @@ final class Main {
 		}
 	}
 	
-
 	private static List<ParsedQuery> parseQueries(String queryFilePath) throws FileNotFoundException, IOException {
 		List<ParsedQuery> allQueries = new ArrayList<>();
 		StringBuilder queryString = new StringBuilder();
@@ -148,7 +148,6 @@ final class Main {
 		return allQueries;
 	}
 
-	
 	private static List<ParsedQuery> parseQueriesDirectory(String directory) throws IOException {
 			List<ParsedQuery> allQueriesAllFiles = new ArrayList<>();
 			try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(queryFolder), "*.queryset")) {
@@ -161,10 +160,11 @@ final class Main {
 			return allQueriesAllFiles;
 		}
 
-
 	public static Set<String> processAQuery(ParsedQuery query) {		
 		List<StatementPattern> patterns = StatementPatternCollector.process(query.getTupleExpr());	
 		startTimePattern=System.currentTimeMillis();
+		runtime.gc();
+		ramTotalPattern = runtime.totalMemory()-runtime.freeMemory();
 		nbPatterns = patterns.size();
 		// Nombre de patterns par requêtes
 		sameNBPatternsMap.put(nbPatterns, sameNBPatternsMap.getOrDefault(nbPatterns, 0) + 1);
@@ -196,6 +196,8 @@ final class Main {
 		}
 		// int --> String
 		text_result = result.stream().map(dictionnary.getDictionnary()::get).collect(Collectors.toSet());
+		ramUtilisePattern = (ramTotalPattern - runtime.freeMemory())/(1000000000);
+		ramTotPerPatternMap.put(nbPatterns, ramTotPerPatternMap.getOrDefault(nbPatterns, (long) 0.0)+ramUtilisePattern);
 		endTimePattern=System.currentTimeMillis()-startTimePattern;
 		timeTotPerPatternMap.put(nbPatterns, timeTotPerPatternMap.getOrDefault(nbPatterns,(long) 0.0 )+endTimePattern);
 		return text_result;
@@ -228,7 +230,6 @@ final class Main {
 		return all_results;
 	}
 	
-
 	private static void warmUpSystem(List<ParsedQuery> queries, int warmPercentage) throws IOException {
 		if (warmPercentage <= 0 || warmPercentage > 100)
 			return;
@@ -239,7 +240,6 @@ final class Main {
 			processAQuery(query);
 	}
 	
-
 	private static void resultsToCsv(String pathFile, List<ParsedQuery> requettes, List<Set<String>> results) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathFile, false))) {
 			writer.write("\"Request\",\"Results\"");
@@ -253,10 +253,9 @@ final class Main {
 		}
 	}
 	
-
 	private static void statsToCsv(String pathFile, int nb_trip, int nb_requettes, long data_read_time,
-			long query_read_time, long dic_time, long index_time, long eval_time, long tot_time, int nb_no_rep,
-			int nb_rep, double pourcentage, double timeJena, int nbQueriesSamePatterns, int nbRequeteDouble, String patternresult) {
+			long query_read_time, int nbQueriesPerSeconde, long dic_time, long index_time, long eval_time, long tot_time, int nb_no_rep,
+			int nb_rep, double pourcentage, double timeJena, int nbQueriesSamePatterns, int nbRequeteDouble, String tempsPattern, String ramPattern,long memoireUtilisee) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(pathFile, true))) {
 			File fichier = new File(pathFile);
 			String qr;
@@ -266,19 +265,19 @@ final class Main {
 				qr = queryFile;
 			if (fichier.length() != 0) {
 				writer.write(dataFile + "," + qr + "," + nb_trip + "," + nb_requettes + "," + data_read_time + ","
-						+ query_read_time + "," + dic_time + "," + "1 - OPS" + "," + index_time + "," + eval_time + ","
+						+ query_read_time + ","+nbQueriesPerSeconde+ "," + dic_time + "," + "1 - OPS" + "," + index_time + "," + eval_time + ","
 						+ tot_time + "," + nb_no_rep + "," + nb_rep + "," + pourcentage + "," + timeJena + ","
-						+ nbQueriesSamePatterns + "," + nbRequeteDouble+","+patternresult);
+						+ nbQueriesSamePatterns + "," + nbRequeteDouble+","+tempsPattern+","+ramPattern+","+memoireUtilisee);
 				writer.newLine();
 
 			} else {
 				writer.write(
-						"\"Data file name\", \"query file name\", \"RDF triplets number\", \"query number\",\"Data reading time(ms)\",\"Query reading time(ms)\" ,\"Dictionary construction time(ms)\", \"Index number\",\"Index creation time\",\"Workload evaluation time (ms)\",\"Total time(ms)\",\"Nb no response request\",\"Nb response\",\"% response equal to Jena\",\"Jena process time(ms)\",\"NB Queries Same Patterns\",\"NB doublons requete\",\"Nb Pattern time\"");
+						"\"Data file name\", \"query file name\", \"RDF triplets number\", \"query number\",\"Data reading time(ms)\",\"Query reading time(ms)\" ,\"Nb requete treated/S \",\"Dictionary construction time(ms)\", \"Index number\",\"Index creation time\",\"Workload evaluation time (ms)\",\"Total time(ms)\",\"Nb no response request\",\"Nb response\",\"% response equal to Jena\",\"Jena process time(ms)\",\"NB Queries Same Patterns\",\"NB doublons requete\",\"time/NB pattern\",\"Ram used/Pattern\",\"Ram utilisé GO\"");
 				writer.newLine();
 				writer.write(dataFile + "," + qr + "," + nb_trip + "," + nb_requettes + "," + data_read_time + ","
-						+ query_read_time + "," + dic_time + "," + "1 - OPS" + "," + index_time + "," + eval_time + ","
+						+ query_read_time + "," +nbQueriesPerSeconde+ "," + dic_time + "," + "1 - OPS" + "," + index_time + "," + eval_time + ","
 						+ tot_time + "," + nb_no_rep + "," + nb_rep + "," + pourcentage + "," + timeJena + ","
-						+ nbQueriesSamePatterns + "," + nbRequeteDouble+","+patternresult);
+						+ nbQueriesSamePatterns + "," + nbRequeteDouble+ "," +tempsPattern+ "," +ramPattern+ "," +memoireUtilisee);
 				writer.newLine();
 
 			}
@@ -287,13 +286,16 @@ final class Main {
 		}
 	}
 	
-
 	public static void main(String[] args) throws Exception {
-		long first_time = System.currentTimeMillis();
+		long full_time, first_time,  memoireTotale;	
+		runtime.gc();
+		memoireTotale = runtime.totalMemory()-runtime.freeMemory();
+	    first_time = System.currentTimeMillis();
 		int nbEqualReqJena = 0, nb_vide = 0, nb_full = 0;
 		Model model = null;
 		double pourcentage_jena = 0.0;
-		long startCheckJena = 0, endCheckJena = 0, startCheckSystem = 0, endCheckSystem = 0;
+		long startCheckJena = 0, endCheckJena = 0, startCheckSystem = 0, endCheckSystem = 0, memoireUtilisee=0, requettes_time, start_data, data_time, start_requettes;
+		String nbRequetePattern, ramPattern;
 		for (int i = 0; i < args.length; i++) {
 			switch (args[i]) {
 			case "-queries":
@@ -327,11 +329,11 @@ final class Main {
 			}
 		}
 
-		long start_data = System.currentTimeMillis();
+	    start_data = System.currentTimeMillis();
 		MainRDFHandler mainRdfHandler = parseData();
-		long data_time = System.currentTimeMillis() - start_data;
+		data_time = System.currentTimeMillis() - start_data;
 
-		long start_requettes = System.currentTimeMillis();
+		start_requettes = System.currentTimeMillis();
 
 		List<ParsedQuery> requettes = new ArrayList<>();
 		if (useFolder) {
@@ -340,7 +342,7 @@ final class Main {
 			requettes = parseQueries(queryFile);
 		}
 
-		long requettes_time = System.currentTimeMillis() - start_requettes;
+	    requettes_time = System.currentTimeMillis() - start_requettes;
 
 		if (shuffle)
 			Collections.shuffle(requettes);
@@ -375,12 +377,15 @@ final class Main {
 			if (results.equals(resultsJena))
 				nbEqualReqJena++;
 		}
+	    memoireUtilisee = (memoireTotale - runtime.freeMemory())/(1000000000);
 		pourcentage_jena = (double) nbEqualReqJena / (double) requettes.size();
-		long full_time = System.currentTimeMillis() - first_time;
-		String patternresult="{" + timeTotPerPatternMap.entrySet().stream().map(entry -> entry.getKey() + "->" +entry.getValue()).collect(Collectors.joining("      |   ")) + "}";
-		statsToCsv(statscsv, mainRdfHandler.getNb_trip(), requettes.size(), data_time, requettes_time,
+	    full_time = System.currentTimeMillis() - first_time;
+	    nbRequetePattern="{" + timeTotPerPatternMap.entrySet().stream().map(entry -> entry.getKey() + "->" +entry.getValue()).collect(Collectors.joining("      |   ")) + "}";
+	    ramPattern="{" + ramTotPerPatternMap.entrySet().stream().map(entry -> entry.getKey() + "->" +entry.getValue()).collect(Collectors.joining("      |   ")) + "}";
+	    nbQueriesPerSeconde=(requettes.size()/(int)requettes_time)*1000;
+		statsToCsv(statscsv, mainRdfHandler.getNb_trip(), requettes.size(), data_time, requettes_time,nbQueriesPerSeconde,
 				mainRdfHandler.getDic_Time(), mainRdfHandler.getIndex_Time(), endCheckSystem, full_time, nb_vide,
-				nb_full, pourcentage_jena * 100.0, endCheckJena, countQueriesSameNbPatterns(), nbRequeteDouble, patternresult);
+				nb_full, pourcentage_jena * 100.0, endCheckJena, countQueriesSameNbPatterns(), nbRequeteDouble, nbRequetePattern, ramPattern, memoireUtilisee );
 	}
 
 }
