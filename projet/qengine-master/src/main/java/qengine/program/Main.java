@@ -308,12 +308,12 @@ final class Main {
 			endTimePattern = 0;
 			ramTotalPattern = 0;
 			ramUtilisePattern = 0;
-			Set<String> results = new HashSet<>();
+			results = new HashSet<>();
 			allResults = new HashSet<>();
-			Set<String> resultsJena = new HashSet<>();
-			Map<Integer, Integer> sameNBPatternsMap = new HashMap<>();
-			Map<Integer, Long> timeTotPerPatternMap = new HashMap<>();
-			Map<Integer, Double> ramTotPerPatternMap = new HashMap<>();
+			resultsJena = new HashSet<>();
+			sameNBPatternsMap = new HashMap<>();
+			timeTotPerPatternMap = new HashMap<>();
+			ramTotPerPatternMap = new HashMap<>();
 			long full_time, first_time, memoireStart;
 
 			String warmType = "";
