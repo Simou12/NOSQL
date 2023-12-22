@@ -282,7 +282,7 @@ final class Main {
 
 			} else {
 				writer.write(
-						"\"Data file name\", \"query file name\", \"warm\",\"RDF triplets number\", \"query number\",\"Data reading time(ms)\",\"Query reading time(ms)\" ,\"Nb requete treated/S \",\"Dictionary construction time(ms)\", \"Index number\",\"Index creation time\",\"Workload evaluation time (ms)\",\"Total time(ms)\",\"Nb no response request\",\"Nb response\",\"% response equal to Jena\",\"Jena process time(ms)\",\"NB Queries Same Patterns\",\"NB doublons requete\",\"time/NB pattern\",\"Ram used/Pattern\",\"Ram utilisé GO\",\"NB total patterns\"");
+						"\"Data file name\", \"query file name\", \"warm\",\"RDF triplets number\", \"query number\",\"Data reading time(ms)\",\"Query reading time(ms)\" ,\"Nb requete treated/S \",\"Dictionary construction time(ms)\", \"Index number\",\"Index creation time\",\"Workload evaluation time (ms)\",\"Total time(ms)\",\"Nb no response request\",\"Nb response\",\"% response equal to Jena\",\"Jena process time(ms)\",\"NB Queries/NB Patterns\",\"NB duplicates requete\",\"time ((100 requêtes)/ NB pattern)\",\"Ram used/NB Pattern\",\"total Ram used GO\",\"NB total patterns\"");
 				writer.newLine();
 				writer.write(dataFile + "," + qr + "," + warmType + "," + nb_trip + "," + nb_requettes + ","
 						+ data_read_time + "," + query_read_time + "," + nbQueriesPerSeconde + "," + dic_time + ","
